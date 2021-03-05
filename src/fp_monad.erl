@@ -21,10 +21,8 @@
 -callback then(fn(monad(A)), monad(_)) -> monad(A).
 -callback lift(fn(A, B)) -> fn(A, monad(B)).
 
-get_module(Ctx) ->
-  {Mod, bind, 2, _File} = lists:keyfind(bind, 2, Ctx),
-  Mod.
-
+%%%_* Code ====================================================================
+%%%_* API ---------------------------------------------------------------------
 pure_with_ctx(Ctx) ->
   Mod = get_module(Ctx),
   fun Mod:pure/1.
@@ -37,11 +35,21 @@ liftA2_with_ctx(Ctx) ->
   Mod = get_module(Ctx),
   fun Mod:liftA2/3.
 
+%%%_* Internal ----------------------------------------------------------------
+is_monad({fp_maybe, bind, 2, _File})  -> true;
+is_monad({fp_either, bind, 2, _File}) -> true;
+is_monad(_Other)                      -> false.
+
+get_module(Ctx) ->
+  OnlyMonads            = lists:filter(fun is_monad/1, Ctx),
+  {Mod, bind, 2, _File} = lists:keyfind(bind, 2, OnlyMonads),
+  Mod.
+
 %%%_* Tests ===================================================================
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 
-do_test() ->
+do_pure_test() ->
   Fun = fun(A) -> ?pure(A + 1) end,
   ?assertEqual({ok, 4},         ?doEither({ok, 3},         [Fun])),
   ?assertEqual({error, reason}, ?doEither({error, reason}, [Fun])),
