@@ -12,8 +12,8 @@
 -export([liftA2_with_ctx/1]).
 
 %%%_* Includes ================================================================
--include("include/fp_types.hrl").
 -include("include/fp_macros.hrl").
+-include("include/fp.hrl").
 
 %%%_* Callbacks ===============================================================
 -callback bind(fn(A, monad(B)), monad(A)) -> monad(B).

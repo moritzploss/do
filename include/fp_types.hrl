@@ -25,9 +25,3 @@
 -type monad(A)       :: [A]
                         | either(_, A)
                         | maybe(A).
-
-%%%_* Emacs ===================================================================
-%%% Local Variables:
-%%% allout-layout: t
-%%% erlang-indent-level: 2
-%%% End:
