@@ -1,5 +1,19 @@
 %%%_* Macros ==================================================================
--define(isFn(F), is_function(F, 1)).
+-define(isF(F),  is_function(F)).
+-define(isF0(F), is_function(F, 0)).
+-define(isF1(F), is_function(F, 1)).
+-define(isF2(F), is_function(F, 2)).
+-define(isF3(F), is_function(F, 3)).
+
+-define(doEither, fun fp_either:do/2).
+-define(doMaybe, fun fp_maybe:do/2).
+
+-define(liftA2, (fp_monad:liftA2_with_ctx(?fp_internal_ctx))).
+-define(pure,   (fp_monad:pure_with_ctx(?fp_internal_ctx))).
+-define(lift(F), fun(A) -> ?pure(F(A)) end).
+
+%%%_* Macros Internal - May Change Any Time ===================================
+-define(fp_internal_ctx, element(2, process_info(self(), current_stacktrace))).
 
 %%%_* Emacs ===================================================================
 %%% Local Variables:

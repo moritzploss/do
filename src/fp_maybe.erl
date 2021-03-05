@@ -11,38 +11,60 @@
 -behaviour(fp_monad).
 
 %%%_* Exports =================================================================
--export([fmap/2]).
--export([pure/1]).
--export([liftA2/3]).
 -export([bind/2]).
+-export([do/2]).
+-export([fmap/2]).
+-export([lift/1]).
+-export([liftA2/3]).
+-export([pure/1]).
+-export([sequence/1]).
+-export([then/2]).
 
 %%%_* Includes ================================================================
 -include("include/fp_macros.hrl").
 -include("include/fp_types.hrl").
 
 %%%_* Code ====================================================================
+-spec bind(fn(A, maybe(B)), maybe(A)) -> maybe(B).
+bind(F, Maybe) when ?isF1(F) -> flat(fmap(F, Maybe)).
+
+-spec do(maybe(A), list(fn(A, maybe(B)))) -> maybe(B).
+do(Maybe, [F])      when ?isF1(F) -> bind(F, Maybe);
+do(Maybe, [F | Fs]) when ?isF1(F) -> do(do(Maybe, [F]), Fs).
+
 -spec fmap(fn(A, B), maybe(A)) -> maybe(B).
-fmap(F, {ok, A}) when ?isFn(F) -> {ok, F(A)};
-fmap(F, error)   when ?isFn(F) -> error.
+fmap(F, {ok, A}) when ?isF1(F) -> {ok, F(A)};
+fmap(F, error)   when ?isF1(F) -> error.
+
+-spec lift(fn(A, B)) -> fn(A, maybe(B)).
+lift(F) when ?isF1(F) -> fun(Arg) -> pure(F(Arg)) end.
+
+-spec liftA2(fn(A, B, C), maybe(A), maybe(B)) -> maybe(C).
+liftA2(F, Maybe1, Maybe2) when is_function(F, 2) -> lift(F, [Maybe1, Maybe2]).
 
 -spec pure(A) -> maybe(A).
 pure(A) -> {ok, A}.
 
--spec liftA2(fn(A, B, C), maybe(A), maybe(B)) -> maybe(C).
-liftA2(F, M1, M2) when is_function(F, 2) ->
-  case fmap(fp:curry(F), M1) of
-    {ok, F2} -> fmap(F2, M2);
-    Error    -> Error
-  end.
+-spec sequence(iterable(maybe(A))) -> maybe(iterable(A)).
+sequence(List) when is_list(List) ->
+  case lists:member(error, List) of
+    true  -> error;
+    false -> pure(element(2, lists:unzip(List)))
+  end;
+sequence(Map) when is_map(Map) ->
+  fmap( fun(Vals) -> maps:from_list(lists:zip(maps:keys(Map), Vals)) end
+      , sequence(maps:values(Map))).
 
--spec bind(fn(A, maybe(B)), maybe(A)) -> maybe(B).
-bind(F, E) when ?isFn(F) ->
-  unlift(fmap(F, E)).
+-spec then(fn(maybe(A)), maybe(_)) -> maybe(A).
+then(F, Maybe) when ?isF0(F) -> bind(fun(_) -> F() end, Maybe).
 
 %%%_* Internal ----------------------------------------------------------------
-unlift({ok, error})   -> error;
-unlift(error)         -> error;
-unlift({ok, {ok, A}}) -> {ok, A}.
+flat({ok, error})   -> error;
+flat(error)         -> error;
+flat({ok, {ok, A}}) -> {ok, A}.
+
+lift(F, Maybes) when is_function(F) ->
+  fmap(fun(Args) -> apply(F, Args) end, sequence(Maybes)).
 
 %%%_* Tests ===================================================================
 -ifdef(TEST).
@@ -62,5 +84,11 @@ bind_test() ->
   ?assertEqual(error,   bind(FOk, error)),
   ?assertEqual(error,   bind(FError, {ok, 2})),
   ?assertEqual(error,   bind(FError, error)).
+
+sequence_test() ->
+  ?assertEqual({ok, [1, 2, 3]},         sequence([{ok, 1}, {ok, 2}, {ok, 3}])),
+  ?assertEqual(error,                   sequence([{ok, 1}, error, {ok, 3}])),
+  ?assertEqual({ok, #{a => 1, b => 2}}, sequence(#{a => {ok, 1}, b => {ok, 2}})),
+  ?assertEqual(error,                   sequence(#{a => {ok, 1}, b => error})).
 
 -endif.
