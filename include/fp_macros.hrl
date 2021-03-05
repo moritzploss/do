@@ -8,10 +8,12 @@
 -define(doEither, fun fp_either:do/2).
 -define(doMaybe, fun fp_maybe:do/2).
 
--define(ctx, element(2, process_info(self(), current_stacktrace))).
--define(liftA2, (fp_monad:liftA2_with_ctx(?ctx))).
--define(pure,   (fp_monad:pure_with_ctx(?ctx))).
+-define(liftA2, (fp_monad:liftA2_with_ctx(?fp_internal_ctx))).
+-define(pure,   (fp_monad:pure_with_ctx(?fp_internal_ctx))).
 -define(lift(F), fun(A) -> ?pure(F(A)) end).
+
+%%%_* Macros Internal - May Change Any Time ===================================
+-define(fp_internal_ctx, element(2, process_info(self(), current_stacktrace))).
 
 %%%_* Emacs ===================================================================
 %%% Local Variables:
