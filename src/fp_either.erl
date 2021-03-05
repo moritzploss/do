@@ -11,10 +11,13 @@
 -behaviour(fp_monad).
 
 %%%_* Exports =================================================================
--export([fmap/2]).
--export([pure/1]).
--export([liftA2/3]).
 -export([bind/2]).
+-export([do/2]).
+-export([fmap/2]).
+-export([liftA2/3]).
+-export([pure/1]).
+-export([sequence/1]).
+-export([then/2]).
 
 %%%_* Includes ================================================================
 -include("include/fp_macros.hrl").
@@ -22,28 +25,45 @@
 
 %%%_* Code ====================================================================
 %%%_* API ---------------------------------------------------------------------
+-spec bind(fn(A, either(B, C)), either(D, A)) -> either(B | D, C).
+bind(F, Either) when ?isF1(F) ->
+  flat(fmap(F, Either)).
+
+-spec do(either(A, B), list(fn(B, either(C, D)))) -> either(A | C, D).
+do(Either, [F])      when ?isF1(F) -> bind(F, Either);
+do(Either, [F | Fs]) when ?isF1(F) -> do(do(Either, [F]), Fs).
+
 -spec fmap(fn(B, C), either(A, B)) -> either(A, C).
-fmap(F, {error, A}) when ?isFn(F) -> {error, A};
-fmap(F, {ok, B})    when ?isFn(F) -> {ok, F(B)}.
+fmap(F, {error, A}) when ?isF1(F) -> {error, A};
+fmap(F, {ok, B})    when ?isF1(F) -> {ok, F(B)}.
+
+-spec liftA2(fn(B1, B2, C), either(A1, B1), either(A2, B2)) -> either(A1 | A2, C).
+liftA2(F, Either1, Either2) when is_function(F, 2) ->
+  lift(F, [Either1, Either2]).
 
 -spec pure(B) -> either(_, B).
 pure(B) -> {ok, B}.
 
--spec liftA2(fn(B1, B2, C), either(A1, B1), either(A2, B2)) -> either(A1 | A2, C).
-liftA2(F, E1, E2) when is_function(F, 2) ->
-  case fmap(fp:curry(F), E1) of
-    {ok, F2} -> fmap(F2, E2);
-    Error    -> Error
-  end.
+-spec sequence(iterable(either(A, B))) -> either(A, iterable(B)).
+sequence(List) when is_list(List) ->
+  case lists:keyfind(error, 1, List) of
+    {error, Reason} -> {error, Reason};
+    false           -> pure(element(2, lists:unzip(List)))
+  end;
+sequence(Map) when is_map(Map) ->
+  fmap( fun(Vals) -> maps:from_list(lists:zip(maps:keys(Map), Vals)) end
+      , sequence(maps:values(Map))).
 
--spec bind(fn(A, either(B, C)), either(D, A)) -> either(B | D, C).
-bind(F, E) when ?isFn(F) ->
-  unlift(fmap(F, E)).
+-spec then(fn(either(A, B)), either(_, _)) -> either(A, B).
+then(F, Either) when ?isF0(F) -> bind(fun(_) -> F() end, Either).
 
 %%%_* Internal ----------------------------------------------------------------
-unlift({ok, {error, A}}) -> {error, A};
-unlift({error, A})       -> {error, A};
-unlift({ok, {ok, B}})    -> {ok, B}.
+flat({ok, {error, A}}) -> {error, A};
+flat({error, A})       -> {error, A};
+flat({ok, {ok, B}})    -> {ok, B}.
+
+lift(F, Eithers) when is_function(F) ->
+  fmap(fun(Args) -> apply(F, Args) end, sequence(Eithers)).
 
 %%%_* Tests ===================================================================
 -ifdef(TEST).
@@ -63,5 +83,11 @@ bind_test() ->
   ?assertEqual({error, reason},  bind(FOk, {error, reason})),
   ?assertEqual({error, reason},  bind(FError, {ok, 2})),
   ?assertEqual({error, reason1}, bind(FError, {error, reason1})).
+
+sequence_test() ->
+  ?assertEqual({ok, [1, 2, 3]},         sequence([{ok, 1}, {ok, 2}, {ok, 3}])),
+  ?assertEqual({error, reason},         sequence([{ok, 1}, {error, reason}, {ok, 3}])),
+  ?assertEqual({ok, #{a => 1, b => 2}}, sequence(#{a => {ok, 1}, b => {ok, 2}})),
+  ?assertEqual({error, reason},         sequence(#{a => {ok, 1}, b => {error, reason}})).
 
 -endif.

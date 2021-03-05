@@ -10,8 +10,9 @@
 -include("include/fp_types.hrl").
 
 %%%_* Callbacks ===============================================================
-% -callback do(fn(_, monad(A)), fn(A, monad(B))) -> monad(B).
 -callback bind(fn(A, monad(B)), monad(A)) -> monad(B).
+-callback do(monad(_), list(fn(_, monad(_)))) -> monad(_).
+-callback then(fn(monad(A)), monad(_)) -> monad(A).
 
 %%%_* Tests ===================================================================
 -ifdef(TEST).

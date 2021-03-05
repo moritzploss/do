@@ -19,12 +19,12 @@
 %%%_* Code ====================================================================
 -spec fmap(fn(A, B), functor(A)) -> functor(B).
 %%@doc fmap(F, Functor) is the result of calling F on every value in Functor.
-fmap(F, List)                when ?isFn(F), is_list(List) -> lists:map(F, List);
-fmap(F, Map)                 when ?isFn(F), is_map(Map)   -> maps:map(fun(_, V) -> F(V) end, Map);
-fmap(F, Fn)                  when ?isFn(F), ?isFn(Fn)     -> fp_fn:fmap(F, Fn);
-fmap(F, {error, _} = Either) when ?isFn(F)                -> fp_either:fmap(F, Either);
-fmap(F, {ok, _} = Either)    when ?isFn(F)                -> fp_either:fmap(F, Either);
-fmap(F, error)               when ?isFn(F)                -> fp_maybe:fmap(F, error).
+fmap(F, List)                when ?isF1(F), is_list(List) -> lists:map(F, List);
+fmap(F, Map)                 when ?isF1(F), is_map(Map)   -> maps:map(fun(_, V) -> F(V) end, Map);
+fmap(F, Fn)                  when ?isF1(F), ?isF1(Fn)     -> fp_fn:fmap(F, Fn);
+fmap(F, {error, _} = Either) when ?isF1(F)                -> fp_either:fmap(F, Either);
+fmap(F, {ok, _} = Either)    when ?isF1(F)                -> fp_either:fmap(F, Either);
+fmap(F, error)               when ?isF1(F)                -> fp_maybe:fmap(F, error).
 
 %%%_* Tests ===================================================================
 -ifdef(TEST).
