@@ -14,6 +14,7 @@
 -export([bind/2]).
 -export([do/2]).
 -export([fmap/2]).
+-export([lift/1]).
 -export([liftA2/3]).
 -export([pure/1]).
 -export([sequence/1]).
@@ -36,6 +37,9 @@ do(Either, [F | Fs]) when ?isF1(F) -> do(do(Either, [F]), Fs).
 -spec fmap(fn(B, C), either(A, B)) -> either(A, C).
 fmap(F, {error, A}) when ?isF1(F) -> {error, A};
 fmap(F, {ok, B})    when ?isF1(F) -> {ok, F(B)}.
+
+-spec lift(fn(A, B)) -> fn(A, either(_, B)).
+lift(F) when ?isF1(F) -> fun(Arg) -> pure(F(Arg)) end.
 
 -spec liftA2(fn(B1, B2, C), either(A1, B1), either(A2, B2)) -> either(A1 | A2, C).
 liftA2(F, Either1, Either2) when is_function(F, 2) ->
