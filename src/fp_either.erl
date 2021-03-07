@@ -30,9 +30,10 @@
 bind(F, Either) when ?isF1(F) ->
   flat(fmap(F, Either)).
 
--spec do(either(A, B), list(fn(B, either(C, D)))) -> either(A | C, D).
-do(Either, [F])      when ?isF1(F) -> bind(F, Either);
-do(Either, [F | Fs]) when ?isF1(F) -> do(do(Either, [F]), Fs).
+-spec do(either(A, B), list(fn(B, either(C, D)) | fn(either(C, D)))) -> either(A | C, D).
+do(Either, [])                     -> Either;
+do(Either, [F | Fs]) when ?isF0(F) -> do(then(F, Either), Fs);
+do(Either, [F | Fs]) when ?isF1(F) -> do(bind(F, Either), Fs).
 
 -spec fmap(fn(B, C), either(A, B)) -> either(A, C).
 fmap(F, {error, A}) when ?isF1(F) -> {error, A};
@@ -46,7 +47,10 @@ liftA2(F, Either1, Either2) when is_function(F, 2) ->
   lift(F, [Either1, Either2]).
 
 -spec pure(B) -> either(_, B).
-pure(B) -> {ok, B}.
+pure({error, A}) -> {error, A};
+pure({ok, B})    -> {ok, B};
+pure(error)      -> {error, error};
+pure(B)          -> {ok, B}.
 
 -spec sequence(iterable(either(A, B))) -> either(A, iterable(B)).
 sequence(List) when is_list(List) ->

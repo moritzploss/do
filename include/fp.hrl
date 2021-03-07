@@ -4,6 +4,7 @@
 %%%_* Macros ==================================================================
 -define(fmap(F, Functor), fp_functor:fmap(F, Functor)).
 
+-define(do, fun fp_either:do/2).
 -define(doEither, fun fp_either:do/2).
 -define(doMaybe, fun fp_maybe:do/2).
 
