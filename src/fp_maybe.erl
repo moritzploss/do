@@ -28,9 +28,10 @@
 -spec bind(fn(A, maybe(B)), maybe(A)) -> maybe(B).
 bind(F, Maybe) when ?isF1(F) -> flat(fmap(F, Maybe)).
 
--spec do(maybe(A), list(fn(A, maybe(B)))) -> maybe(B).
-do(Maybe, [F])      when ?isF1(F) -> bind(F, Maybe);
-do(Maybe, [F | Fs]) when ?isF1(F) -> do(do(Maybe, [F]), Fs).
+-spec do(maybe(A), list(fn(A, maybe(B)) | fn(maybe(B)))) -> maybe(B).
+do(Maybe, [])                     -> Maybe;
+do(Maybe, [F | Fs]) when ?isF0(F) -> do(then(F, Maybe), Fs);
+do(Maybe, [F | Fs]) when ?isF1(F) -> do(bind(F, Maybe), Fs).
 
 -spec fmap(fn(A, B), maybe(A)) -> maybe(B).
 fmap(F, {ok, A}) when ?isF1(F) -> {ok, F(A)};
@@ -43,7 +44,10 @@ lift(F) when ?isF1(F) -> fun(Arg) -> pure(F(Arg)) end.
 liftA2(F, Maybe1, Maybe2) when is_function(F, 2) -> lift(F, [Maybe1, Maybe2]).
 
 -spec pure(A) -> maybe(A).
-pure(A) -> {ok, A}.
+pure({ok, A})    -> {ok, A};
+pure(error)      -> error;
+pure({error, _}) -> error;
+pure(A)          -> {ok, A}.
 
 -spec sequence(iterable(maybe(A))) -> maybe(iterable(A)).
 sequence(List) when is_list(List) ->
