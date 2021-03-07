@@ -4,7 +4,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%_* Module declaration ======================================================
--module(fp_monad).
+-module(do_monad).
 
 %%%_* Exports =================================================================
 -export([pure_with_ctx/1]).
@@ -12,8 +12,8 @@
 -export([liftA2_with_ctx/1]).
 
 %%%_* Includes ================================================================
--include("include/fp_macros.hrl").
--include("include/fp.hrl").
+-include("include/do_macros.hrl").
+-include("include/do.hrl").
 
 %%%_* Callbacks ===============================================================
 -callback bind(fn(A, monad(B)), monad(A)) -> monad(B).
@@ -36,8 +36,8 @@ liftA2_with_ctx(Ctx) ->
   fun Mod:liftA2/3.
 
 %%%_* Internal ----------------------------------------------------------------
-is_monad({fp_maybe, bind, 2, _File})  -> true;
-is_monad({fp_either, bind, 2, _File}) -> true;
+is_monad({do_maybe, bind, 2, _File})  -> true;
+is_monad({do_either, bind, 2, _File}) -> true;
 is_monad(_Other)                      -> false.
 
 get_module(Ctx) ->

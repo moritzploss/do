@@ -4,10 +4,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%_* Module declaration ======================================================
--module(fp_applicative).
+-module(do_applicative).
 
 %%%_* Includes ================================================================
--include("include/fp_types.hrl").
+-include("include/do_types.hrl").
 
 %%%_* Callbacks ===============================================================
 -callback pure(A) -> applicative(A).

@@ -4,11 +4,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%_* Module declaration ======================================================
--module(fp_maybe).
+-module(do_maybe).
 
--behaviour(fp_functor).
--behaviour(fp_applicative).
--behaviour(fp_monad).
+-behaviour(do_functor).
+-behaviour(do_applicative).
+-behaviour(do_monad).
 
 %%%_* Exports =================================================================
 -export([bind/2]).
@@ -21,8 +21,8 @@
 -export([then/2]).
 
 %%%_* Includes ================================================================
--include("include/fp_macros.hrl").
--include("include/fp_types.hrl").
+-include("include/do_macros.hrl").
+-include("include/do_types.hrl").
 
 %%%_* Code ====================================================================
 -spec bind(fn(A, maybe(B)), maybe(A)) -> maybe(B).
