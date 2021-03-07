@@ -4,10 +4,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%_* Module declaration ======================================================
--module(fp_fn).
+-module(do_fn).
 
--behaviour(fp_functor).
--behaviour(fp_applicative).
+-behaviour(do_functor).
+-behaviour(do_applicative).
 
 %%%_* Exports =================================================================
 -export([fmap/2]).
@@ -16,8 +16,8 @@
 -export([sequence/1]).
 
 %%%_* Includes ================================================================
--include("include/fp_macros.hrl").
--include("include/fp_types.hrl").
+-include("include/do_macros.hrl").
+-include("include/do_types.hrl").
 
 %%%_* Code ====================================================================
 -spec fmap(fn(B, C), fn(A, B)) -> fn(A, C).
@@ -32,7 +32,7 @@ pure(A) -> fun(_) -> A end.
 
 -spec sequence(iterable(fn(A, B))) -> fn(A, iterable(B)).
 sequence(Iterable) when is_list(Iterable) or is_map(Iterable) ->
-  fun(A) -> fp_functor:fmap(fun(F) -> F(A) end, Iterable) end.
+  fun(A) -> do_functor:fmap(fun(F) -> F(A) end, Iterable) end.
 
 %%%_* Tests ===================================================================
 -ifdef(TEST).

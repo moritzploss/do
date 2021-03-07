@@ -1,5 +1,5 @@
-{application, fp,
- [{description, "A Functional Programming Library"},
+{application, do,
+ [{description, "Do-Notation and Monads for Erlang"},
   {vsn, "0.0.1"},
   {registered, []},
   {applications,
