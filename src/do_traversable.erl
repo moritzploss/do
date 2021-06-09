@@ -22,16 +22,13 @@
 sequence([F | Rest], Mod) when ?isF0(F) ->
   sequence([F() | Rest], Mod);
 sequence([Elm | Rest], Mod) ->
-  case Mod:is_right(Elm) of
-    true  -> Mod:fmap(fun(Vals) -> [Mod:right(Elm) | Vals] end, sequence(Rest, Mod));
-    false -> Elm
-  end;
+  Mod:liftA2(fun(Val, Vals) -> [Val | Vals] end, Elm, sequence(Rest, Mod));
 sequence([], Mod) ->
   Mod:pure([]);
 sequence(Map, Mod) when is_map(Map) ->
   {Keys, Vals} = lists:unzip(maps:to_list(Map)),
   Mod:fmap(fun(Sequenced) -> maps:from_list(lists:zip(Keys, Sequenced)) end,
-            sequence(Vals, Mod)).
+           sequence(Vals, Mod)).
 
 -spec traverse(fn(A, applicative(B)), traversable(A)) -> applicative(traversable(B)).
 traverse(F, Traversable) when ?isF1(F) -> do_functor:fmap(F, Traversable).

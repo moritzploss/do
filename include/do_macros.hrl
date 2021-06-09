@@ -6,5 +6,3 @@
 -define(isF1(F),    is_function(F, 1)).
 -define(isF2(F),    is_function(F, 2)).
 -define(isF3(F),    is_function(F, 3)).
-
--define(thunk(A),   fun() -> A end).

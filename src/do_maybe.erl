@@ -18,15 +18,10 @@
                liftA2/3,
                liftm/2,
                pure/1,
+               sequence/1,
                then/2]).
 -export(?API).
 -ignore_xref(?API).
-
--define(CB, [ sequence/1,
-              is_right/1,
-              right/1]).
--export(?CB).
--ignore_xref(?CB).
 
 %%%_* Includes ================================================================
 -include("include/do_macros.hrl").
@@ -41,20 +36,15 @@ fmap(F, error)   when ?isF1(F) -> error.
 
 %%%_* applicative -------------------------------------------------------------
 -spec liftA2(fn(A, A, B), maybe(A), maybe(A)) -> maybe(B).
-liftA2(F, Maybe1, Maybe2) when ?isF2(F) -> liftm(F, [Maybe1, Maybe2]).
+liftA2(F, {ok, V1}, {ok, V2}) when ?isF2(F) -> {ok, F(V1, V2)};
+liftA2(F, error, _)           when ?isF2(F) -> error;
+liftA2(F, _, error)           when ?isF2(F) -> error.
 
 -spec pure(A) -> maybe(A).
 pure(A) -> {ok, A}.
 
 -spec sequence(traversable(maybe(A))) -> maybe(traversable(A)).
 sequence(Maybes) -> do_traversable:sequence(Maybes, ?MODULE).
-
--spec is_right(term()) -> boolean().
-is_right({ok, _}) -> true;
-is_right(error)   -> false.
-
--spec right(maybe(A)) -> A.
-right({ok, A}) -> A.
 
 %%%_* monad -------------------------------------------------------------------
 -spec bind(fn(A, maybe(B)), maybe(A)) -> maybe(B).
@@ -119,5 +109,12 @@ sequence_test() ->
   ?assertEqual(error,                   sequence([{ok, 1}, error, {ok, 3}])),
   ?assertEqual({ok, #{a => 1, b => 2}}, sequence(#{a => {ok, 1}, b => {ok, 2}})),
   ?assertEqual(error,                   sequence(#{a => {ok, 1}, b => error})).
+
+do_test() ->
+  Fun0 = fun() -> ?pure(5) end,
+  Fun = fun(A) -> ?pure(A + 1) end,
+  ?assertEqual({ok, 4},  do({ok, 3}, [Fun])),
+  ?assertEqual({ok, 6},  do({ok, 3}, [Fun0, Fun])),
+  ?assertEqual(error,    do(error,   [Fun])).
 
 -endif.

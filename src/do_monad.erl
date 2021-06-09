@@ -27,9 +27,6 @@
 -callback lift(fn(A, B)) -> fn(monad(A), monad(B)).
 -callback liftm(fun(), [monad(A)] | [fn(monad(A))]) -> monad(_).
 
--callback is_right(applicative(_)) -> boolean().
--callback right(applicative(A)) -> A.
-
 %%%_* Code ====================================================================
 %%%_* API ---------------------------------------------------------------------
 pure_with_ctx(Ctx) ->
@@ -70,16 +67,6 @@ do_pure_test() ->
   Fun = fun(A) -> ?pure(A + 1) end,
   ?assertEqual({ok, 4},         ?do({ok, 3},           [Fun])),
   ?assertEqual({ok, 4},         ?do({ok, 3},           [Fun0, Fun])),
-  ?assertEqual({ok, 4},         ?do(do_maybe, {ok, 3}, [Fun0, Fun])),
-  ?assertEqual({error, reason}, ?do({error, reason},   [Fun])),
-  ?assertEqual({ok, 4},         ?do(do_maybe, {ok, 3}, [Fun])),
-  ?assertEqual(error,           ?do(do_maybe, error,   [Fun])).
-
-do_lift_test() ->
-  Fun = fun(A) -> ?pure(A + 1) end,
-  ?assertEqual({ok, 4},         ?do({ok, 3},           [Fun])),
-  ?assertEqual({error, reason}, ?do({error, reason},   [Fun])),
-  ?assertEqual({ok, 4},         ?do(do_maybe, {ok, 3}, [Fun])),
-  ?assertEqual(error,           ?do(do_maybe, error,   [Fun])).
+  ?assertEqual({error, reason}, ?do({error, reason},   [Fun])).
 
 -endif.

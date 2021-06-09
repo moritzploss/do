@@ -18,15 +18,10 @@
                liftA2/3,
                liftm/2,
                pure/1,
+               sequence/1,
                then/2]).
 -export(?API).
 -ignore_xref(?API).
-
--define(CB, [ sequence/1,
-              is_right/1,
-              right/1]).
--export(?CB).
--ignore_xref(?CB).
 
 %%%_* Includes ================================================================
 -include("include/do_macros.hrl").
@@ -41,20 +36,15 @@ fmap(F, {ok, B})    when ?isF1(F) -> {ok, F(B)}.
 
 %%%_* applicative -------------------------------------------------------------
 -spec liftA2(fn(B, B, C), either(A1, B), either(A2, B)) -> either(A1 | A2, C).
-liftA2(F, Either1, Either2) when ?isF2(F) -> liftm(F, [Either1, Either2]).
+liftA2(F, {ok, V1}, {ok, V2}) when ?isF2(F) -> {ok, F(V1, V2)};
+liftA2(F, {error, Reason}, _) when ?isF2(F) -> {error, Reason};
+liftA2(F, _, {error, Reason}) when ?isF2(F) -> {error, Reason}.
 
 -spec pure(B) -> either(_, B).
 pure(B) -> {ok, B}.
 
 -spec sequence(traversable(either(A, B))) -> either(A, traversable(B)).
 sequence(Eithers) -> do_traversable:sequence(Eithers, ?MODULE).
-
--spec is_right(term()) -> boolean().
-is_right({ok, _})    -> true;
-is_right({error, _}) -> false.
-
--spec right(maybe(A)) -> A.
-right({ok, A}) -> A.
 
 %%%_* monad -------------------------------------------------------------------
 -spec bind(fn(A, either(B, C)), either(D, A)) -> either(B | D, C).
