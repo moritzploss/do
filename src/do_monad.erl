@@ -68,18 +68,18 @@ get_module(Ctx) ->
 do_pure_test() ->
   Fun0 = fun() -> ?pure(3) end,
   Fun = fun(A) -> ?pure(A + 1) end,
-  ?assertEqual({ok, 4},         ?doEither({ok, 3},         [Fun])),
-  ?assertEqual({ok, 4},         ?doEither({ok, 3},         [Fun0, Fun])),
-  ?assertEqual({ok, 4},         ?doMaybe({ok, 3},          [Fun0, Fun])),
-  ?assertEqual({error, reason}, ?doEither({error, reason}, [Fun])),
-  ?assertEqual({ok, 4},         ?doMaybe({ok, 3},          [Fun])),
-  ?assertEqual(error,           ?doMaybe(error,            [Fun])).
+  ?assertEqual({ok, 4},         ?do({ok, 3},           [Fun])),
+  ?assertEqual({ok, 4},         ?do({ok, 3},           [Fun0, Fun])),
+  ?assertEqual({ok, 4},         ?do(do_maybe, {ok, 3}, [Fun0, Fun])),
+  ?assertEqual({error, reason}, ?do({error, reason},   [Fun])),
+  ?assertEqual({ok, 4},         ?do(do_maybe, {ok, 3}, [Fun])),
+  ?assertEqual(error,           ?do(do_maybe, error,   [Fun])).
 
 do_lift_test() ->
   Fun = fun(A) -> ?pure(A + 1) end,
-  ?assertEqual({ok, 4},         ?doEither({ok, 3},         [Fun])),
-  ?assertEqual({error, reason}, ?doEither({error, reason}, [Fun])),
-  ?assertEqual({ok, 4},         ?doMaybe({ok, 3},          [Fun])),
-  ?assertEqual(error,           ?doMaybe(error,            [Fun])).
+  ?assertEqual({ok, 4},         ?do({ok, 3},           [Fun])),
+  ?assertEqual({error, reason}, ?do({error, reason},   [Fun])),
+  ?assertEqual({ok, 4},         ?do(do_maybe, {ok, 3}, [Fun])),
+  ?assertEqual(error,           ?do(do_maybe, error,   [Fun])).
 
 -endif.
