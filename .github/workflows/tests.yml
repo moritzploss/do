@@ -20,7 +20,7 @@ jobs:
           rebar3 do eunit, cover --min_coverage 100
 
   release:
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main'
     needs: build_and_test
     runs-on: ubuntu-latest
     steps:

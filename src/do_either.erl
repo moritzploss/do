@@ -74,7 +74,7 @@ liftm(F, Eithers) -> do_monad:liftm(F, Eithers, ?MODULE).
 -spec then(fn(either(A, B)), either(_, _)) -> either(A, B).
 then(F, Either) -> do_monad:then(F, Either, ?MODULE).
 
-%%%_* callbacks ---------------------------------------------------------------
+%%%_* internal ----------------------------------------------------------------
 flat({ok, {error, A}}) -> {error, A};
 flat({error, A})       -> {error, A};
 flat({ok, {ok, B}})    -> {ok, B}.
