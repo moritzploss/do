@@ -11,19 +11,22 @@
 -behaviour(do_monad).
 
 %%%_* Exports =================================================================
--export([bind/2]).
--export([do/2]).
--export([fmap/2]).
--export([lift/1]).
--export([liftA2/3]).
--export([liftm/2]).
--export([pure/1]).
--export([then/2]).
+-define(API, [ bind/2,
+               do/2,
+               fmap/2,
+               lift/1,
+               liftA2/3,
+               liftm/2,
+               pure/1,
+               then/2]).
+-export(?API).
+-ignore_xref(?API).
 
--export([sequence/1]).
--export([flat/1]).
--export([is_right/1]).
--export([right/1]).
+-define(CB, [ sequence/1,
+              is_right/1,
+              right/1]).
+-export(?CB).
+-ignore_xref(?CB).
 
 %%%_* Includes ================================================================
 -include("include/do_macros.hrl").

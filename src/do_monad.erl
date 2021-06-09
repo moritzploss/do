@@ -7,12 +7,13 @@
 -module(do_monad).
 
 %%%_* Exports =================================================================
--export([pure_with_ctx/1]).
-
 -export([liftm/3]).
 -export([do/3]).
 -export([then/3]).
 -export([lift/2]).
+
+-export([pure_with_ctx/1]).
+-ignore_xref([pure_with_ctx/1]).
 
 %%%_* Includes ================================================================
 -include("include/do_macros.hrl").

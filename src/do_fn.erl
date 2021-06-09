@@ -13,7 +13,6 @@
 -export([fmap/2]).
 -export([liftA2/3]).
 -export([pure/1]).
--export([sequence/1]).
 
 %%%_* Includes ================================================================
 -include("include/do_macros.hrl").
@@ -30,10 +29,6 @@ liftA2(F1, F2, F3) ->
 -spec pure(A) -> fn(_, A).
 pure(A) -> fun(_) -> A end.
 
--spec sequence(traversable(fn(A, B))) -> fn(A, traversable(B)).
-sequence(Traversable) when is_list(Traversable) or is_map(Traversable) ->
-  fun(A) -> do_functor:fmap(fun(F) -> F(A) end, Traversable) end.
-
 %%%_* Tests ===================================================================
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
@@ -47,14 +42,5 @@ liftA2_test() ->
   H = fun(E) -> E end,
   I = liftA2(F, G, H),
   ?assertEqual(3, (I(1))(2)).
-
-sequence_test() ->
-  F1            = fun(X) -> X + 1 end,
-  F2            = fun(X) -> X + 2 end,
-  F3            = fun(X) -> X + 3 end,
-  SequencedList = sequence([F1, F2, F3]),
-  SequencedMap  = sequence(#{a => F1, b => F2, c => F3}),
-  ?assertEqual([2, 3, 4], SequencedList(1)),
-  ?assertEqual(#{a => 2, b => 3, c => 4}, SequencedMap(1)).
 
 -endif.
