@@ -74,7 +74,7 @@ liftm(F, Maybes) -> do_monad:liftm(F, Maybes, ?MODULE).
 -spec then(fn(maybe(A)), maybe(_)) -> maybe(A).
 then(F, Maybe) -> do_monad:then(F, Maybe, ?MODULE).
 
-%%%_* callbacks ---------------------------------------------------------------
+%%%_* internal ----------------------------------------------------------------
 flat({ok, error})   -> error;
 flat(error)         -> error;
 flat({ok, {ok, A}}) -> {ok, A}.
