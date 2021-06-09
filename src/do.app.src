@@ -1,6 +1,6 @@
 {application, do,
  [{description, "Do-Notation and Monads for Erlang"},
-  {vsn, "0.0.1"},
+  {vsn, "1.0.2"},
   {registered, []},
   {applications,
    [kernel,
@@ -9,6 +9,6 @@
   {env,[]},
   {modules, []},
 
-  {licenses, ["Apache 2.0"]},
-  {links, []}
+  {licenses, ["MIT"]},
+  {links, [{"GitHub", "https://github.com/moritzploss/do"}]}
  ]}.
