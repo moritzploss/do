@@ -40,13 +40,11 @@ fmap(F, {error, A}) when ?isF1(F) -> {error, A};
 fmap(F, {ok, B})    when ?isF1(F) -> {ok, F(B)}. 
 
 %%%_* applicative -------------------------------------------------------------
--spec liftA2(fn(B, B, C), either(_, B), either(_, B)) -> either(_, C).
+-spec liftA2(fn(B, B, C), either(A1, B), either(A2, B)) -> either(A1 | A2, C).
 liftA2(F, Either1, Either2) when ?isF2(F) -> liftm(F, [Either1, Either2]).
 
 -spec pure(B) -> either(_, B).
-pure({error, A}) -> {error, A};
-pure({ok, B})    -> {ok, B};
-pure(B)          -> {ok, B}.
+pure(B) -> {ok, B}.
 
 -spec sequence(traversable(either(A, B))) -> either(A, traversable(B)).
 sequence(Eithers) -> do_traversable:sequence(Eithers, ?MODULE).
@@ -84,11 +82,8 @@ flat({ok, {ok, B}})    -> {ok, B}.
 -include_lib("eunit/include/eunit.hrl").
 
 pure_test() ->
-  ?assertEqual({ok, 3},      pure({ok, 3})),
-  ?assertEqual({ok, 3},      pure(3)),
-  ?assertEqual({ok, ok},     pure(ok)),
-  ?assertEqual({ok, error},  pure(error)),
-  ?assertEqual({error, rsn}, pure({error, rsn})).
+  ?assertEqual({ok, {ok, 3}}, pure({ok, 3})),
+  ?assertEqual({ok, 3},       pure(3)).
 
 lift_test() ->
   F      = fun(A) -> A + 1 end,
