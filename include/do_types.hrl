@@ -9,7 +9,7 @@
 
 -type maybe(A)       :: {ok, A} | error.
 
--type iterable(A)    :: [A] | #{_ := A}.
+-type traversable(A) :: [A] | #{_ := A}.
 
 -type applicative(A) :: [A]
                         | fn(_, A)

@@ -16,4 +16,4 @@ jobs:
           otp-version: ${{matrix.otp}}
       - run: |
           rebar3 dialyzer
-          rebar3 eunit
+          rebar3 do eunit, cover --min_coverage 100

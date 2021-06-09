@@ -1,7 +1,7 @@
-[![Tests](https://github.com/moritzploss/fp/actions/workflows/tests.yml/badge.svg)](https://github.com/moritzploss/fp/actions/workflows/tests.yml)
+[![Tests](https://github.com/moritzploss/do/actions/workflows/tests.yml/badge.svg)](https://github.com/moritzploss/do/actions/workflows/tests.yml)
 
 
-fp
+do
 =====
 
 An OTP library

@@ -4,10 +4,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%_* Module declaration ======================================================
--module(fp_fn).
+-module(do_fn).
 
--behaviour(fp_functor).
--behaviour(fp_applicative).
+-behaviour(do_functor).
+-behaviour(do_applicative).
 
 %%%_* Exports =================================================================
 -export([fmap/2]).
@@ -16,8 +16,8 @@
 -export([sequence/1]).
 
 %%%_* Includes ================================================================
--include("include/fp_macros.hrl").
--include("include/fp_types.hrl").
+-include("include/do_macros.hrl").
+-include("include/do_types.hrl").
 
 %%%_* Code ====================================================================
 -spec fmap(fn(B, C), fn(A, B)) -> fn(A, C).
@@ -30,13 +30,23 @@ liftA2(F1, F2, F3) ->
 -spec pure(A) -> fn(_, A).
 pure(A) -> fun(_) -> A end.
 
--spec sequence(iterable(fn(A, B))) -> fn(A, iterable(B)).
-sequence(Iterable) when is_list(Iterable) or is_map(Iterable) ->
-  fun(A) -> fp_functor:fmap(fun(F) -> F(A) end, Iterable) end.
+-spec sequence(traversable(fn(A, B))) -> fn(A, traversable(B)).
+sequence(Traversable) when is_list(Traversable) or is_map(Traversable) ->
+  fun(A) -> do_functor:fmap(fun(F) -> F(A) end, Traversable) end.
 
 %%%_* Tests ===================================================================
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
+
+pure_test() ->
+  ?assertEqual(2, (pure(2))(foo)).
+
+liftA2_test() ->
+  F = fun(A, B) -> A + B end,
+  G = fun(D) -> D end,
+  H = fun(E) -> E end,
+  I = liftA2(F, G, H),
+  ?assertEqual(3, (I(1))(2)).
 
 sequence_test() ->
   F1            = fun(X) -> X + 1 end,
