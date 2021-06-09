@@ -11,68 +11,90 @@
 -behaviour(do_monad).
 
 %%%_* Exports =================================================================
--export([bind/2]).
--export([do/2]).
--export([fmap/2]).
--export([lift/1]).
--export([liftA2/3]).
--export([pure/1]).
--export([sequence/1]).
--export([then/2]).
+-define(API, [ bind/2,
+               do/2,
+               fmap/2,
+               lift/1,
+               liftA2/3,
+               liftm/2,
+               pure/1,
+               then/2]).
+-export(?API).
+-ignore_xref(?API).
+
+-define(CB, [ sequence/1,
+              is_right/1,
+              right/1]).
+-export(?CB).
+-ignore_xref(?CB).
 
 %%%_* Includes ================================================================
 -include("include/do_macros.hrl").
 -include("include/do_types.hrl").
+-include("include/do.hrl").
 
 %%%_* Code ====================================================================
--spec bind(fn(A, maybe(B)), maybe(A)) -> maybe(B).
-bind(F, Maybe) when ?isF1(F) -> flat(fmap(F, Maybe)).
-
--spec do(maybe(A), list(fn(A, maybe(B)) | fn(maybe(B)))) -> maybe(B).
-do(Maybe, [])                     -> Maybe;
-do(Maybe, [F | Fs]) when ?isF0(F) -> do(then(F, Maybe), Fs);
-do(Maybe, [F | Fs]) when ?isF1(F) -> do(bind(F, Maybe), Fs).
-
+%%%_* functor -----------------------------------------------------------------
 -spec fmap(fn(A, B), maybe(A)) -> maybe(B).
 fmap(F, {ok, A}) when ?isF1(F) -> {ok, F(A)};
 fmap(F, error)   when ?isF1(F) -> error.
 
--spec lift(fn(A, B)) -> fn(A, maybe(B)).
-lift(F) when ?isF1(F) -> fun(Arg) -> pure(F(Arg)) end.
-
--spec liftA2(fn(A, B, C), maybe(A), maybe(B)) -> maybe(C).
-liftA2(F, Maybe1, Maybe2) when is_function(F, 2) -> lift(F, [Maybe1, Maybe2]).
+%%%_* applicative -------------------------------------------------------------
+-spec liftA2(fn(A, A, B), maybe(A), maybe(A)) -> maybe(B).
+liftA2(F, Maybe1, Maybe2) when ?isF2(F) -> liftm(F, [Maybe1, Maybe2]).
 
 -spec pure(A) -> maybe(A).
 pure({ok, A})    -> {ok, A};
 pure(error)      -> error;
-pure({error, _}) -> error;
 pure(A)          -> {ok, A}.
 
--spec sequence(iterable(maybe(A))) -> maybe(iterable(A)).
-sequence(List) when is_list(List) ->
-  case lists:member(error, List) of
-    true  -> error;
-    false -> pure(element(2, lists:unzip(List)))
-  end;
-sequence(Map) when is_map(Map) ->
-  fmap( fun(Vals) -> maps:from_list(lists:zip(maps:keys(Map), Vals)) end
-      , sequence(maps:values(Map))).
+-spec sequence(traversable(maybe(A))) -> maybe(traversable(A)).
+sequence(Maybes) -> do_traversable:sequence(Maybes, ?MODULE).
+
+-spec is_right(term()) -> boolean().
+is_right({ok, _}) -> true;
+is_right(error)   -> false.
+
+-spec right(maybe(A)) -> A.
+right({ok, A}) -> A.
+
+%%%_* monad -------------------------------------------------------------------
+-spec bind(fn(A, maybe(B)), maybe(A)) -> maybe(B).
+bind(F, Maybe) when ?isF1(F) -> flat(fmap(F, Maybe)).
+
+-spec do(maybe(A), list(fn(A, maybe(B)) | fn(maybe(B)))) -> maybe(B).
+do(Maybe, Fs) -> do_monad:do(Maybe, Fs, ?MODULE).
+
+-spec lift(fn(A, B)) -> fn(monad(A), monad(B)).
+lift(F) -> do_monad:lift(F, ?MODULE).
+
+-spec liftm(fun(), [either(_, B)] | [fn(either(_, B))]) -> either(_, B).
+liftm(F, Maybes) -> do_monad:liftm(F, Maybes, ?MODULE).
 
 -spec then(fn(maybe(A)), maybe(_)) -> maybe(A).
-then(F, Maybe) when ?isF0(F) -> bind(fun(_) -> F() end, Maybe).
+then(F, Maybe) -> do_monad:then(F, Maybe, ?MODULE).
 
-%%%_* Internal ----------------------------------------------------------------
+%%%_* callbacks ---------------------------------------------------------------
 flat({ok, error})   -> error;
 flat(error)         -> error;
 flat({ok, {ok, A}}) -> {ok, A}.
 
-lift(F, Maybes) when is_function(F) ->
-  fmap(fun(Args) -> apply(F, Args) end, sequence(Maybes)).
-
 %%%_* Tests ===================================================================
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
+
+pure_test() ->
+  ?assertEqual({ok, 3},            pure({ok, 3})),
+  ?assertEqual({ok, 3},            pure(3)),
+  ?assertEqual({ok, ok},           pure(ok)),
+  ?assertEqual({ok, {error, rsn}}, pure({error, rsn})),
+  ?assertEqual(error,              pure(error)).
+
+lift_test() ->
+  F      = fun(A) -> A + 1 end,
+  Lifted = lift(F),
+  ?assertEqual({ok, 2}, Lifted({ok, 1})),
+  ?assertEqual(error,   Lifted(error)).
 
 liftA2_test() ->
   F = fun(A, B) -> A + B end,
@@ -80,6 +102,14 @@ liftA2_test() ->
   ?assertEqual(error,   liftA2(F, {ok, 1}, error)),
   ?assertEqual(error,   liftA2(F, error,   {ok, 2})),
   ?assertEqual(error,   liftA2(F, error,   error)).
+
+liftm_test() ->
+  F = fun(A, B, C) -> A + B + C end,
+  ?assertEqual({ok, 4}, liftm(F, [{ok, 1}, {ok, 2}, {ok, 1}])),
+  ?assertEqual({ok, 4}, liftm(F, [{ok, 1}, ?thunk({ok, 2}), {ok, 1}])),
+  ?assertEqual(error,   liftm(F, [{ok, 1}, error,   {ok, 1}])),
+  ?assertEqual(error,   liftm(F, [error,   {ok, 2}, {ok, 1}])),
+  ?assertEqual(error,   liftm(F, [error,   error,   {ok, 1}])).
 
 bind_test() ->
   FOk    = fun(A) -> {ok, A + 1} end,
