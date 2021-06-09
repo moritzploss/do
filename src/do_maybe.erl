@@ -44,9 +44,7 @@ fmap(F, error)   when ?isF1(F) -> error.
 liftA2(F, Maybe1, Maybe2) when ?isF2(F) -> liftm(F, [Maybe1, Maybe2]).
 
 -spec pure(A) -> maybe(A).
-pure({ok, A})    -> {ok, A};
-pure(error)      -> error;
-pure(A)          -> {ok, A}.
+pure(A) -> {ok, A}.
 
 -spec sequence(traversable(maybe(A))) -> maybe(traversable(A)).
 sequence(Maybes) -> do_traversable:sequence(Maybes, ?MODULE).
@@ -84,11 +82,8 @@ flat({ok, {ok, A}}) -> {ok, A}.
 -include_lib("eunit/include/eunit.hrl").
 
 pure_test() ->
-  ?assertEqual({ok, 3},            pure({ok, 3})),
-  ?assertEqual({ok, 3},            pure(3)),
-  ?assertEqual({ok, ok},           pure(ok)),
-  ?assertEqual({ok, {error, rsn}}, pure({error, rsn})),
-  ?assertEqual(error,              pure(error)).
+  ?assertEqual({ok, {ok, 3}}, pure({ok, 3})),
+  ?assertEqual({ok, 3},       pure(3)).
 
 lift_test() ->
   F      = fun(A) -> A + 1 end,
