@@ -18,7 +18,7 @@
 
 %%%_* Code ====================================================================
 -spec fmap(fn(A, B), functor(A)) -> functor(B).
-fmap(F, List)                when ?isF1(F), is_list(List) -> lists:map(F, List);
+fmap(F, List)                when ?isF1(F), is_list(List) -> do_list:fmap(F, List);
 fmap(F, Map)                 when ?isF1(F), is_map(Map)   -> maps:map(fun(_, V) -> F(V) end, Map);
 fmap(F, Fn)                  when ?isF1(F), ?isF1(Fn)     -> do_fn:fmap(F, Fn);
 fmap(F, {error, _} = Either) when ?isF1(F)                -> do_either:fmap(F, Either);

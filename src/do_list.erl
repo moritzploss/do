@@ -26,6 +26,7 @@
 %%%_* Includes ================================================================
 -include("do_macros.hrl").
 -include("do_types.hrl").
+-include("do.hrl").
 
 %%%_* Code ====================================================================
 %%%_* functor -----------------------------------------------------------------
@@ -35,7 +36,7 @@ fmap(F, List) when ?isF1(F) -> lists:map(F, List).
 %%%_* applicative -------------------------------------------------------------
 -spec liftA2([fn(A, B)], [A]) -> [B].
 liftA2(List1, List2) ->
-  flat(fmap(fun(E2) -> fmap(fun(F) -> F(E2) end, List1) end, List2)).
+  flat(fmap(fun(F) -> fmap(F, List2) end, List1)).
 
 -spec pure(A) -> [A].
 pure(A) -> [A].
@@ -66,8 +67,34 @@ flat(List) -> lists:concat(List).
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 
+pure_test() ->
+  ?assertEqual([1], pure(1)).
+
+lift_test() ->
+  F      = fun(A) -> A + 1 end,
+  Lifted = lift(F),
+  ?assertEqual([2, 3, 4], Lifted([1, 2, 3])).
+
 liftA2_test() ->
   Applicative = fmap(fun(E1) -> fun(E2) -> E1 + E2 end end, [-1, 0, 1]),
-  ?assertEqual([0, 1, 2, 1, 2, 3, 2, 3, 4], liftA2(Applicative, [1, 2, 3])).
+  ?assertEqual([0, 1, 2, 1, 2, 3, 2, 3, 4], liftA2(Applicative, [1, 2, 3])),
+  ?assertEqual([],                          liftA2(Applicative, [])),
+  ?assertEqual([],                          liftA2([],          [1, 2, 3])).
+
+sequence_test() ->
+  ?assertEqual([],                                               sequence([[]])),
+  ?assertEqual([[1]],                                            sequence([[1]])),
+  ?assertEqual([[1, 2, 3]],                                      sequence([[1], [2], [3]])),
+  ?assertEqual([],                                               sequence([[1, 2], []])),
+  ?assertEqual([],                                               sequence([[], [1, 2]])),
+  ?assertEqual([[1, 3], [1, 4], [1, 5], [2, 3], [2, 4], [2, 5]], sequence([[1, 2], [3, 4, 5]])).
+
+do_test() ->
+  Fun0 = fun() -> ?pure(3) end,
+  Fun  = fun(A) -> ?pure(A + 1) end,
+  ?assertEqual([3], do([3],  [])),
+  ?assertEqual([4], do([3],  [Fun])),
+  ?assertEqual([4], do([3],  [Fun0, Fun])),
+  ?assertEqual([],  do([],   [Fun])).
 
 -endif.

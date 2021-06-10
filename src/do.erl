@@ -21,7 +21,7 @@
 -include("do.hrl").
 
 %%%_* Macros ==================================================================
--define(MONADS, [do_either, do_maybe, do_list]).
+-define(MONADS, [do_either, do_list, do_maybe]).
 -define(KEY,    {?MODULE, monads}).
 
 %%%_* Code ====================================================================
