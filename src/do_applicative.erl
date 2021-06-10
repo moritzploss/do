@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% @doc
+%%% @doc The Applicative Type Class.
 %%% @end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -11,9 +11,4 @@
 
 %%%_* Callbacks ===============================================================
 -callback pure(A) -> applicative(A).
--callback liftA2(fn(A, B, C), functor(A), functor(B)) -> functor(C).
-
-%%%_* Tests ===================================================================
--ifdef(TEST).
--include_lib("eunit/include/eunit.hrl").
--endif.
+-callback liftA2(functor(fn(A, B)), functor(A)) -> functor(B).

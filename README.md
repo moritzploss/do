@@ -2,13 +2,15 @@
 
 ## do
 
-This package brings `do`-notation and related monads to Erlang.
+This package brings monads, applicatives, functors, and `do`-notation to
+Erlang. It provides behaviours for relevant type classes, as well as
+implementations for commonly used class instances.
 
 ## Quick Start
 
 The `either` type is defined as a tuple of either `{ok, Value}` or
-`{error, Reason}`, and is a member of the functor and monad type classes.
-The `?fmap` macro can be used to map functions over functors:
+`{error, Reason}`, and is a member of the functor, applicative and monad type
+class. The `?fmap` macro can be used to map functions over functors:
 
 ```erlang
 -include_lib("do/include/do.hrl").
@@ -53,5 +55,3 @@ do_example2() ->
                                          fun maybe_add1/1,
                                          fun maybe_add1/1]).
 ```
-
-

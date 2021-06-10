@@ -1,37 +1,59 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% @doc
+%%% @doc The Traversable Type Class.
 %%% @end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%_* Module declaration ======================================================
 -module(do_traversable).
 
-%%%_* Includes ================================================================
--include("do_macros.hrl").
--include("do_types.hrl").
-
 %%%_* Exports =================================================================
 -define(API, [ sequence/2,
+               sequence_lazy/2,
                traverse/2]).
 -export(?API).
 -ignore_xref(?API).
 
+%%%_* Includes ================================================================
+-include("do_macros.hrl").
+-include("do_types.hrl").
+
+%%%_* Macros ==================================================================
+-define(LAZY,    lazy).
+-define(THUNK,   thunk).
+-define(DEFAULT, default).
+
 %%%_* Code ====================================================================
 %%%_* API ---------------------------------------------------------------------
--spec sequence(traversable(applicative(A)), atom()) -> applicative(traversable(A)).
-sequence([F | Rest], Mod) when ?isF0(F) ->
-  sequence([F() | Rest], Mod);
-sequence([Elm | Rest], Mod) ->
-  Mod:liftA2(fun(Val, Vals) -> [Val | Vals] end, Elm, sequence(Rest, Mod));
-sequence([], Mod) ->
+-spec sequence(traversable(applicative(A)), atom()) ->
+  applicative(traversable(A)).
+sequence(Traversable, Mod) ->
+  sequence(Traversable, Mod, ?DEFAULT).
+
+-spec sequence_lazy(traversable(fn(applicative(A))), atom()) ->
+  applicative(traversable(A)).
+sequence_lazy(Traversable, Mod) ->
+  sequence(Traversable, Mod, ?LAZY).
+
+-spec traverse(fn(A, applicative(B)), traversable(A)) ->
+  applicative(traversable(B)).
+traverse(F, Traversable) when ?isF1(F) -> do_functor:fmap(F, Traversable).
+
+%%%_* internal ----------------------------------------------------------------
+sequence([F | Rest], Mod, ?LAZY) when ?isF0(F) ->
+  sequence([F() | Rest], Mod, ?THUNK);
+sequence([Elm | Rest], Mod, Mode) ->
+  Applicative = Mod:fmap(fun(Val) -> fun(Vals) -> [Val | Vals] end end, Elm),
+  Mod:liftA2(Applicative, sequence(Rest, Mod, reset(Mode)));
+sequence([], Mod, _Mode) ->
   Mod:pure([]);
-sequence(Map, Mod) when is_map(Map) ->
+sequence(Map, Mod, Mode) when is_map(Map) ->
   {Keys, Vals} = lists:unzip(maps:to_list(Map)),
   Mod:fmap(fun(Sequenced) -> maps:from_list(lists:zip(Keys, Sequenced)) end,
-           sequence(Vals, Mod)).
+           sequence(Vals, Mod, Mode)).
 
--spec traverse(fn(A, applicative(B)), traversable(A)) -> applicative(traversable(B)).
-traverse(F, Traversable) when ?isF1(F) -> do_functor:fmap(F, Traversable).
+reset(?LAZY)    -> ?LAZY;
+reset(?THUNK)   -> ?LAZY;
+reset(?DEFAULT) -> ?DEFAULT.
 
 %%%_* Tests ===================================================================
 -ifdef(TEST).

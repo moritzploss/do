@@ -56,7 +56,7 @@ basic_test() ->
   ?assertEqual(#{a => 2, b => 3}, fmap(F, #{a => 1, b => 2})),
   ?assertEqual(2,                 (fmap(F, fun(_) -> 1 end))(arg)).
 
-assertEqual(Expected, Actual) when is_function(Expected), is_function(Actual) ->
+assertEqual(Expected, Actual) when ?isF(Expected), ?isF(Actual) ->
   assertEqual(Expected(arg), Actual(arg));
 assertEqual(Expected, Actual) ->
   ?assertEqual(Expected, Actual).  

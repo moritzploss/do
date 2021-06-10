@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% @doc The Maybe Type.
+%%% @doc The Maybe Monad.
 %%% @end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -15,8 +15,9 @@
                do/2,
                fmap/2,
                lift/1,
-               liftA2/3,
+               liftA2/2,
                liftm/2,
+               liftmz/2,
                pure/1,
                sequence/1,
                then/2]).
@@ -35,10 +36,9 @@ fmap(F, {ok, A}) when ?isF1(F) -> {ok, F(A)};
 fmap(F, error)   when ?isF1(F) -> error.
 
 %%%_* applicative -------------------------------------------------------------
--spec liftA2(fn(A, A, B), maybe(A), maybe(A)) -> maybe(B).
-liftA2(F, {ok, V1}, {ok, V2}) when ?isF2(F) -> {ok, F(V1, V2)};
-liftA2(F, error, _)           when ?isF2(F) -> error;
-liftA2(F, _, error)           when ?isF2(F) -> error.
+-spec liftA2(maybe(fn(A, B)), maybe(A)) -> maybe(B).
+liftA2({ok, F}, Maybe) when ?isF1(F) -> fmap(F, Maybe);
+liftA2(error, _)                     -> error.
 
 -spec pure(A) -> maybe(A).
 pure(A) -> {ok, A}.
@@ -51,13 +51,16 @@ sequence(Maybes) -> do_traversable:sequence(Maybes, ?MODULE).
 bind(F, Maybe) when ?isF1(F) -> flat(fmap(F, Maybe)).
 
 -spec do(maybe(A), list(fn(A, maybe(B)) | fn(maybe(B)))) -> maybe(B).
-do(Maybe, Fs) -> do_monad:do(Maybe, Fs, ?MODULE).
+do(Maybe, Fs) -> do_monad:do(Maybe, Fs, [?MODULE]).
 
 -spec lift(fn(A, B)) -> fn(monad(A), monad(B)).
 lift(F) -> do_monad:lift(F, ?MODULE).
 
--spec liftm(fun(), [either(_, B)] | [fn(either(_, B))]) -> either(_, B).
+-spec liftm(fun(), [either(_, B)]) -> either(_, B).
 liftm(F, Maybes) -> do_monad:liftm(F, Maybes, ?MODULE).
+
+-spec liftmz(fun(), [fn(either(_, B))]) -> either(_, B).
+liftmz(F, Maybes) -> do_monad:liftmz(F, Maybes, ?MODULE).
 
 -spec then(fn(maybe(A)), maybe(_)) -> maybe(A).
 then(F, Maybe) -> do_monad:then(F, Maybe, ?MODULE).
@@ -82,16 +85,15 @@ lift_test() ->
   ?assertEqual(error,   Lifted(error)).
 
 liftA2_test() ->
-  F = fun(A, B) -> A + B end,
-  ?assertEqual({ok, 3}, liftA2(F, {ok, 1}, {ok, 2})),
-  ?assertEqual(error,   liftA2(F, {ok, 1}, error)),
-  ?assertEqual(error,   liftA2(F, error,   {ok, 2})),
-  ?assertEqual(error,   liftA2(F, error,   error)).
+  F = fun(A) -> A + 1 end,
+  ?assertEqual({ok, 3}, liftA2({ok, F}, {ok, 2})),
+  ?assertEqual(error,   liftA2({ok, F}, error)),
+  ?assertEqual(error,   liftA2(error,   {ok, 2})),
+  ?assertEqual(error,   liftA2(error,   error)).
 
 liftm_test() ->
   F = fun(A, B, C) -> A + B + C end,
   ?assertEqual({ok, 4}, liftm(F, [{ok, 1}, {ok, 2}, {ok, 1}])),
-  ?assertEqual({ok, 4}, liftm(F, [{ok, 1}, ?thunk({ok, 2}), {ok, 1}])),
   ?assertEqual(error,   liftm(F, [{ok, 1}, error,   {ok, 1}])),
   ?assertEqual(error,   liftm(F, [error,   {ok, 2}, {ok, 1}])),
   ?assertEqual(error,   liftm(F, [error,   error,   {ok, 1}])).
