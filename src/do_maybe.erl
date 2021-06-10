@@ -24,9 +24,9 @@
 -ignore_xref(?API).
 
 %%%_* Includes ================================================================
--include("include/do_macros.hrl").
--include("include/do_types.hrl").
--include("include/do.hrl").
+-include("do_macros.hrl").
+-include("do_types.hrl").
+-include("do.hrl").
 
 %%%_* Code ====================================================================
 %%%_* functor -----------------------------------------------------------------

@@ -1,0 +1,120 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Module do_either</title>
+<link rel="stylesheet" type="text/css" href="stylesheet.css" title="EDoc">
+</head>
+<body bgcolor="white">
+<div class="navbar"><a name="#navbar_top"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<hr>
+
+<h1>Module do_either</h1>
+<ul class="index"><li><a href="#description">Description</a></li><li><a href="#types">Data Types</a></li><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>The Either Type.
+
+<p><b>Behaviours:</b> <a href="do_applicative.html"><tt>do_applicative</tt></a>, <a href="do_functor.html"><tt>do_functor</tt></a>, <a href="do_monad.html"><tt>do_monad</tt></a>.</p>
+
+<h2><a name="description">Description</a></h2>The Either Type.
+<h2><a name="types">Data Types</a></h2>
+
+<h3 class="typedecl"><a name="type-either">either()</a></h3>
+<p><tt>either(A, B) = {error, A} | {ok, B}</tt></p>
+
+
+<h3 class="typedecl"><a name="type-fn">fn()</a></h3>
+<p><tt>fn(A, B, C) = fun((A, B) -&gt; C)</tt></p>
+
+
+<h3 class="typedecl"><a name="type-fn">fn()</a></h3>
+<p><tt>fn(A, B) = fun((A) -&gt; B)</tt></p>
+
+
+<h3 class="typedecl"><a name="type-fn">fn()</a></h3>
+<p><tt>fn(A) = fun(() -&gt; A)</tt></p>
+
+
+<h3 class="typedecl"><a name="type-maybe">maybe()</a></h3>
+<p><tt>maybe(A) = {ok, A} | error</tt></p>
+
+
+<h3 class="typedecl"><a name="type-monad">monad()</a></h3>
+<p><tt>monad(A) = [A] | <a href="#type-either">either</a>(term(), A) | <a href="#type-maybe">maybe</a>(A)</tt></p>
+
+
+<h3 class="typedecl"><a name="type-traversable">traversable()</a></h3>
+<p><tt>traversable(A) = [A] | #{term() := A}</tt></p>
+
+
+<h2><a name="index">Function Index</a></h2>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#bind-2">bind/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#do-2">do/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#fmap-2">fmap/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#lift-1">lift/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#liftA2-3">liftA2/3</a></td><td></td></tr>
+<tr><td valign="top"><a href="#liftm-2">liftm/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#pure-1">pure/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#sequence-1">sequence/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#then-2">then/2</a></td><td></td></tr>
+</table>
+
+<h2><a name="functions">Function Details</a></h2>
+
+<h3 class="function"><a name="bind-2">bind/2</a></h3>
+<div class="spec">
+<p><tt>bind(F::<a href="#type-fn">fn</a>(A, <a href="#type-either">either</a>(B, C)), Either::<a href="#type-either">either</a>(D, A)) -&gt; <a href="#type-either">either</a>(B | D, C)</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="do-2">do/2</a></h3>
+<div class="spec">
+<p><tt>do(Either::<a href="#type-either">either</a>(A, B), Fs::[<a href="#type-fn">fn</a>(B, <a href="#type-either">either</a>(C, D)) | <a href="#type-fn">fn</a>(<a href="#type-either">either</a>(C, D))]) -&gt; <a href="#type-either">either</a>(A | C, D)</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="fmap-2">fmap/2</a></h3>
+<div class="spec">
+<p><tt>fmap(F::<a href="#type-fn">fn</a>(B, C), X2::<a href="#type-either">either</a>(A, B)) -&gt; <a href="#type-either">either</a>(A, C)</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="lift-1">lift/1</a></h3>
+<div class="spec">
+<p><tt>lift(F::<a href="#type-fn">fn</a>(A, B)) -&gt; <a href="#type-fn">fn</a>(<a href="#type-monad">monad</a>(A), <a href="#type-monad">monad</a>(B))</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="liftA2-3">liftA2/3</a></h3>
+<div class="spec">
+<p><tt>liftA2(F::<a href="#type-fn">fn</a>(B, B, C), X2::<a href="#type-either">either</a>(A1, B), X3::<a href="#type-either">either</a>(A2, B)) -&gt; <a href="#type-either">either</a>(A1 | A2, C)</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="liftm-2">liftm/2</a></h3>
+<div class="spec">
+<p><tt>liftm(F::function(), Eithers::[<a href="#type-either">either</a>(term(), B)] | [<a href="#type-fn">fn</a>(<a href="#type-either">either</a>(term(), B))]) -&gt; <a href="#type-either">either</a>(term(), B)</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="pure-1">pure/1</a></h3>
+<div class="spec">
+<p><tt>pure(B) -&gt; <a href="#type-either">either</a>(term(), B)</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="sequence-1">sequence/1</a></h3>
+<div class="spec">
+<p><tt>sequence(Eithers::<a href="#type-traversable">traversable</a>(<a href="#type-either">either</a>(A, B))) -&gt; <a href="#type-either">either</a>(A, <a href="#type-traversable">traversable</a>(B))</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="then-2">then/2</a></h3>
+<div class="spec">
+<p><tt>then(F::<a href="#type-fn">fn</a>(<a href="#type-either">either</a>(A, B)), Either::<a href="#type-either">either</a>(term(), term())) -&gt; <a href="#type-either">either</a>(A, B)</tt><br></p>
+<p> </p>
+</div>
+<hr>
+
+<div class="navbar"><a name="#navbar_bottom"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<p><i>Generated by EDoc</i></p>
+</body>
+</html>

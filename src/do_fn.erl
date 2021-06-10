@@ -15,8 +15,8 @@
 -export([pure/1]).
 
 %%%_* Includes ================================================================
--include("include/do_macros.hrl").
--include("include/do_types.hrl").
+-include("do_macros.hrl").
+-include("do_types.hrl").
 
 %%%_* Code ====================================================================
 -spec fmap(fn(B, C), fn(A, B)) -> fn(A, C).
