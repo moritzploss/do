@@ -18,15 +18,10 @@
                liftA2/3,
                liftm/2,
                pure/1,
+               sequence/1,
                then/2]).
 -export(?API).
 -ignore_xref(?API).
-
--define(CB, [ sequence/1,
-              is_right/1,
-              right/1]).
--export(?CB).
--ignore_xref(?CB).
 
 %%%_* Includes ================================================================
 -include("include/do_macros.hrl").
@@ -41,20 +36,15 @@ fmap(F, {ok, B})    when ?isF1(F) -> {ok, F(B)}.
 
 %%%_* applicative -------------------------------------------------------------
 -spec liftA2(fn(B, B, C), either(A1, B), either(A2, B)) -> either(A1 | A2, C).
-liftA2(F, Either1, Either2) when ?isF2(F) -> liftm(F, [Either1, Either2]).
+liftA2(F, {ok, V1}, {ok, V2}) when ?isF2(F) -> {ok, F(V1, V2)};
+liftA2(F, {error, Reason}, _) when ?isF2(F) -> {error, Reason};
+liftA2(F, _, {error, Reason}) when ?isF2(F) -> {error, Reason}.
 
 -spec pure(B) -> either(_, B).
 pure(B) -> {ok, B}.
 
 -spec sequence(traversable(either(A, B))) -> either(A, traversable(B)).
 sequence(Eithers) -> do_traversable:sequence(Eithers, ?MODULE).
-
--spec is_right(term()) -> boolean().
-is_right({ok, _})    -> true;
-is_right({error, _}) -> false.
-
--spec right(maybe(A)) -> A.
-right({ok, A}) -> A.
 
 %%%_* monad -------------------------------------------------------------------
 -spec bind(fn(A, either(B, C)), either(D, A)) -> either(B | D, C).
@@ -112,6 +102,14 @@ bind_test() ->
   ?assertEqual({error, reason},  bind(FOk, {error, reason})),
   ?assertEqual({error, reason},  bind(FError, {ok, 2})),
   ?assertEqual({error, reason1}, bind(FError, {error, reason1})).
+
+do_test() ->
+  Fun0 = fun() -> ?pure(3) end,
+  Fun  = fun(A) -> ?pure(A + 1) end,
+  ?assertEqual({ok, 3},         do({ok, 3},           [])),
+  ?assertEqual({ok, 4},         do({ok, 3},           [Fun])),
+  ?assertEqual({ok, 4},         do({ok, 3},           [Fun0, Fun])),
+  ?assertEqual({error, reason}, do({error, reason},   [Fun])).
 
 sequence_test() ->
   ?assertEqual({ok, [1, 2, 3]},         sequence([{ok, 1}, {ok, 2}, {ok, 3}])),

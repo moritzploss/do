@@ -11,7 +11,7 @@
 
 %%%_* Callbacks ===============================================================
 -callback pure(A) -> applicative(A).
--callback liftA2(fn(A, A, B), functor(A), functor(A)) -> functor(B).
+-callback liftA2(fn(A, B, C), functor(A), functor(B)) -> functor(C).
 
 %%%_* Tests ===================================================================
 -ifdef(TEST).
