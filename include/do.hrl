@@ -3,7 +3,7 @@
 -define(pure(A),               (do_monad:pure_with_ctx(?do_internal_ctx))(A)).
 -define(sequence(Traversable), do_either:sequence(Traversable)).
 -define(lift(F),               do_either:lift(F)).
--define(liftA2(F, A1, A2),     ?liftm(F, A1, A2)).
+-define(liftA2(F, A1, A2),     do_either:liftA2(F, A1, A2)).
 -define(do(Either, Funs),      do_either:do(Either, Funs)).
 -define(bind(F, Either),       do_either:bind(F, Either)).
 -define(then(F, Either),       do_either:then(F, Either)).

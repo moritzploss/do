@@ -103,6 +103,14 @@ bind_test() ->
   ?assertEqual({error, reason},  bind(FError, {ok, 2})),
   ?assertEqual({error, reason1}, bind(FError, {error, reason1})).
 
+do_test() ->
+  Fun0 = fun() -> ?pure(3) end,
+  Fun  = fun(A) -> ?pure(A + 1) end,
+  ?assertEqual({ok, 3},         do({ok, 3},           [])),
+  ?assertEqual({ok, 4},         do({ok, 3},           [Fun])),
+  ?assertEqual({ok, 4},         do({ok, 3},           [Fun0, Fun])),
+  ?assertEqual({error, reason}, do({error, reason},   [Fun])).
+
 sequence_test() ->
   ?assertEqual({ok, [1, 2, 3]},         sequence([{ok, 1}, {ok, 2}, {ok, 3}])),
   ?assertEqual({ok, [1, 2, 3]},         sequence([{ok, 1}, ?thunk({ok, 2}), {ok, 3}])),

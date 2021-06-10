@@ -62,11 +62,45 @@ get_module(Ctx) ->
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 
-do_pure_test() ->
+fmap_macro_test() ->
+  F = fun(A) -> A + 1 end,
+  ?assertEqual({ok, 2}, ?fmap(F, {ok, 1})).
+
+lift_macro_test() ->
+  F      = fun(A) -> A + 1 end,
+  Lifted = ?lift(F),
+  ?assertEqual({ok, 2},      Lifted({ok, 1})),
+  ?assertEqual({error, rsn}, Lifted({error, rsn})).
+
+sequence_macro_test() ->
+  ?assertEqual({ok, [1, 2]}, ?sequence([{ok, 1}, {ok, 2}])).
+
+bind_macro_test() ->
+  F = fun(A) -> {ok, A + 1} end,
+  ?assertEqual({ok, 3},          ?bind(F, {ok, 2})),
+  ?assertEqual({error, reason},  ?bind(F, {error, reason})).
+
+then_macro_test() ->
+  F = fun() -> {ok, 1} end,
+  ?assertEqual({ok, 1},          ?then(F, {ok, 2})),
+  ?assertEqual({error, reason},  ?then(F, {error, reason})).
+
+do_macro_test() ->
   Fun0 = fun() -> ?pure(3) end,
   Fun = fun(A) -> ?pure(A + 1) end,
-  ?assertEqual({ok, 4},         ?do({ok, 3},           [Fun])),
   ?assertEqual({ok, 4},         ?do({ok, 3},           [Fun0, Fun])),
   ?assertEqual({error, reason}, ?do({error, reason},   [Fun])).
+
+liftm_macro_test() ->
+  F = fun(A, B, C) -> A + B + C end,
+  ?assertEqual({ok, 6},    ?liftm(F, {ok, 1}, {ok, 2}, {ok, 3})),
+  ?assertEqual({ok, 6},    ?liftm(F, {ok, 1}, {ok, 2}, ?thunk({ok, 3}))),
+  ?assertEqual({error, 3}, ?liftm(F, {ok, 1}, {ok, 2}, {error, 3})).
+
+liftA2_macro_test() ->
+  F = fun(A, B) -> A + B end,
+  ?assertEqual({ok, 3},    ?liftA2(F, {ok, 1}, {ok, 2})),
+  ?assertEqual({error, 3}, ?liftA2(F, {ok, 1}, {error, 3})),
+  ?assertEqual({error, 1}, ?liftA2(F, {error, 1}, {ok, 3})).
 
 -endif.
