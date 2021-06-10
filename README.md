@@ -13,7 +13,7 @@ The `?fmap` macro can be used to map functions over functors:
 ```erlang
 -include_lib("do/include/do.hrl").
 
-add1(Num) -> Num + 1.
+add1(N) -> N + 1.
 
 fmap_example() ->
   {ok, 2}      = ?fmap(fun add1/1, {ok, 1}),
@@ -36,9 +36,9 @@ maybe_add1(N) when N > 5 -> {error, greater_five};
 maybe_add1(N)            -> {ok, N + 1}.
 
 do_example1() ->
-  {ok, 3} = ?do(0, [ fun maybe_add1/1,
-                     fun maybe_add1/1,
-                     fun maybe_add1/1]).
+  {ok, 3} = ?do({ok, 0}, [ fun maybe_add1/1,
+                           fun maybe_add1/1,
+                           fun maybe_add1/1]).
 ```
 
 If a function returns an error tuple `{error, Reason}`, the error is returned
@@ -46,12 +46,12 @@ immediately.
 
 ```erlang
 do_example2() ->
-  {error, greater_five} = ?do(0, [ fun maybe_add1/1,
-                                   fun maybe_add1/1,
-                                   fun maybe_add1/1,
-                                   fun maybe_add1/1,
-                                   fun maybe_add1/1,
-                                   fun maybe_add1/1]).
+  {error, greater_five} = ?do({ok, 0}, [ fun maybe_add1/1,
+                                         fun maybe_add1/1,
+                                         fun maybe_add1/1,
+                                         fun maybe_add1/1,
+                                         fun maybe_add1/1,
+                                         fun maybe_add1/1]).
 ```
 
 
