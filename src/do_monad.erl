@@ -16,9 +16,9 @@
 -ignore_xref([pure_with_ctx/1]).
 
 %%%_* Includes ================================================================
--include("include/do_macros.hrl").
--include("include/do_types.hrl").
--include("include/do.hrl").
+-include("do_macros.hrl").
+-include("do_types.hrl").
+-include("do.hrl").
 
 %%%_* Callbacks ===============================================================
 -callback bind(fn(A, monad(B)), monad(A)) -> monad(B).

@@ -7,7 +7,7 @@
 -module(do_applicative).
 
 %%%_* Includes ================================================================
--include("include/do_types.hrl").
+-include("do_types.hrl").
 
 %%%_* Callbacks ===============================================================
 -callback pure(A) -> applicative(A).
