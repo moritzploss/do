@@ -11,7 +11,7 @@ The `either` type is defined as a tuple of either `{ok, Value}` or
 The `?fmap` macro can be used to map functions over functors:
 
 ```erlang
--include("include/do.hrl").
+-include_lib("do/include/do.hrl").
 
 add1(Num) -> Num + 1.
 
@@ -30,7 +30,7 @@ list. If the function returns `{ok, Val}`, the second function is called with
 `Val`, and so on:
 
 ```erlang
--include("include/do.hrl").
+-include_lib("do/include/do.hrl").
 
 maybe_add1(N) when N > 5 -> {error, greater_five};
 maybe_add1(N)            -> {ok, N + 1}.
