@@ -10,10 +10,11 @@
 <hr>
 
 <h1>Module do_monad</h1>
-<ul class="index"><li><a href="#types">Data Types</a></li><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>
+<ul class="index"><li><a href="#description">Description</a></li><li><a href="#types">Data Types</a></li><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>The Monad Type Class.
 
 <p><b>This module defines the <tt>do_monad</tt> behaviour.</b><br> Required callback functions: <tt>bind/2</tt>, <tt>do/2</tt>, <tt>then/2</tt>, <tt>lift/1</tt>, <tt>liftm/2</tt>.</p>
 
+<h2><a name="description">Description</a></h2>The Monad Type Class.
 <h2><a name="types">Data Types</a></h2>
 
 <h3 class="typedecl"><a name="type-either">either()</a></h3>
@@ -40,6 +41,7 @@
 <table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#do-3">do/3</a></td><td></td></tr>
 <tr><td valign="top"><a href="#lift-2">lift/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#liftm-3">liftm/3</a></td><td></td></tr>
+<tr><td valign="top"><a href="#liftmz-3">liftmz/3</a></td><td></td></tr>
 <tr><td valign="top"><a href="#pure_with_ctx-1">pure_with_ctx/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#then-3">then/3</a></td><td></td></tr>
 </table>
@@ -48,7 +50,7 @@
 
 <h3 class="function"><a name="do-3">do/3</a></h3>
 <div class="spec">
-<p><tt>do(Monad::<a href="#type-monad">monad</a>(A), Fs::[<a href="#type-fn">fn</a>(A, <a href="#type-monad">monad</a>(B)) | <a href="#type-fn">fn</a>(<a href="#type-monad">monad</a>(B))], Mod::atom()) -&gt; <a href="#type-monad">monad</a>(B)</tt><br></p>
+<p><tt>do(Monad::<a href="#type-monad">monad</a>(A), Fs::[<a href="#type-fn">fn</a>(A, <a href="#type-monad">monad</a>(B)) | <a href="#type-fn">fn</a>(<a href="#type-monad">monad</a>(B))], Mods::[atom()]) -&gt; <a href="#type-monad">monad</a>(B)</tt><br></p>
 <p> </p>
 </div>
 
@@ -60,7 +62,13 @@
 
 <h3 class="function"><a name="liftm-3">liftm/3</a></h3>
 <div class="spec">
-<p><tt>liftm(F::function(), Monads::[<a href="#type-monad">monad</a>(A)] | [<a href="#type-fn">fn</a>(<a href="#type-monad">monad</a>(A))], Mod::atom()) -&gt; <a href="#type-monad">monad</a>(term())</tt><br></p>
+<p><tt>liftm(F::function(), Monads::[<a href="#type-monad">monad</a>(term())], Mod::atom()) -&gt; <a href="#type-monad">monad</a>(term())</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="liftmz-3">liftmz/3</a></h3>
+<div class="spec">
+<p><tt>liftmz(F::function(), Thunks::[<a href="#type-fn">fn</a>(<a href="#type-monad">monad</a>(term()))], Mod::atom()) -&gt; <a href="#type-monad">monad</a>(term())</tt><br></p>
 <p> </p>
 </div>
 

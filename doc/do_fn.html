@@ -10,15 +10,12 @@
 <hr>
 
 <h1>Module do_fn</h1>
-<ul class="index"><li><a href="#types">Data Types</a></li><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>
+<ul class="index"><li><a href="#description">Description</a></li><li><a href="#types">Data Types</a></li><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>The Fun Functor.
 
-<p><b>Behaviours:</b> <a href="do_applicative.html"><tt>do_applicative</tt></a>, <a href="do_functor.html"><tt>do_functor</tt></a>.</p>
+<p><b>Behaviours:</b> <a href="do_functor.html"><tt>do_functor</tt></a>.</p>
 
+<h2><a name="description">Description</a></h2>The Fun Functor.
 <h2><a name="types">Data Types</a></h2>
-
-<h3 class="typedecl"><a name="type-fn">fn()</a></h3>
-<p><tt>fn(A, B, C) = fun((A, B) -&gt; C)</tt></p>
-
 
 <h3 class="typedecl"><a name="type-fn">fn()</a></h3>
 <p><tt>fn(A, B) = fun((A) -&gt; B)</tt></p>
@@ -26,8 +23,6 @@
 
 <h2><a name="index">Function Index</a></h2>
 <table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#fmap-2">fmap/2</a></td><td></td></tr>
-<tr><td valign="top"><a href="#liftA2-3">liftA2/3</a></td><td></td></tr>
-<tr><td valign="top"><a href="#pure-1">pure/1</a></td><td></td></tr>
 </table>
 
 <h2><a name="functions">Function Details</a></h2>
@@ -35,18 +30,6 @@
 <h3 class="function"><a name="fmap-2">fmap/2</a></h3>
 <div class="spec">
 <p><tt>fmap(F::<a href="#type-fn">fn</a>(B, C), Fun::<a href="#type-fn">fn</a>(A, B)) -&gt; <a href="#type-fn">fn</a>(A, C)</tt><br></p>
-<p> </p>
-</div>
-
-<h3 class="function"><a name="liftA2-3">liftA2/3</a></h3>
-<div class="spec">
-<p><tt>liftA2(F1::<a href="#type-fn">fn</a>(A, B, C), F2::<a href="#type-fn">fn</a>(D, A), F3::<a href="#type-fn">fn</a>(E, B)) -&gt; <a href="#type-fn">fn</a>(D, <a href="#type-fn">fn</a>(E, C))</tt><br></p>
-<p> </p>
-</div>
-
-<h3 class="function"><a name="pure-1">pure/1</a></h3>
-<div class="spec">
-<p><tt>pure(A) -&gt; <a href="#type-fn">fn</a>(term(), A)</tt><br></p>
 <p> </p>
 </div>
 <hr>

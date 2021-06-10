@@ -2,19 +2,19 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Module do_maybe</title>
+<title>Module do_list</title>
 <link rel="stylesheet" type="text/css" href="stylesheet.css" title="EDoc">
 </head>
 <body bgcolor="white">
 <div class="navbar"><a name="#navbar_top"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
 <hr>
 
-<h1>Module do_maybe</h1>
-<ul class="index"><li><a href="#description">Description</a></li><li><a href="#types">Data Types</a></li><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>The Maybe Monad.
+<h1>Module do_list</h1>
+<ul class="index"><li><a href="#description">Description</a></li><li><a href="#types">Data Types</a></li><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>The List Monad.
 
 <p><b>Behaviours:</b> <a href="do_applicative.html"><tt>do_applicative</tt></a>, <a href="do_functor.html"><tt>do_functor</tt></a>, <a href="do_monad.html"><tt>do_monad</tt></a>.</p>
 
-<h2><a name="description">Description</a></h2>The Maybe Monad.
+<h2><a name="description">Description</a></h2>The List Monad.
 <h2><a name="types">Data Types</a></h2>
 
 <h3 class="typedecl"><a name="type-either">either()</a></h3>
@@ -48,7 +48,6 @@
 <tr><td valign="top"><a href="#lift-1">lift/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#liftA2-2">liftA2/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#liftm-2">liftm/2</a></td><td></td></tr>
-<tr><td valign="top"><a href="#liftmz-2">liftmz/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#pure-1">pure/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#sequence-1">sequence/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#then-2">then/2</a></td><td></td></tr>
@@ -58,19 +57,19 @@
 
 <h3 class="function"><a name="bind-2">bind/2</a></h3>
 <div class="spec">
-<p><tt>bind(F::<a href="#type-fn">fn</a>(A, <a href="#type-maybe">maybe</a>(B)), Maybe::<a href="#type-maybe">maybe</a>(A)) -&gt; <a href="#type-maybe">maybe</a>(B)</tt><br></p>
+<p><tt>bind(F::<a href="#type-fn">fn</a>(A, [B]), List::[A]) -&gt; [B]</tt><br></p>
 <p> </p>
 </div>
 
 <h3 class="function"><a name="do-2">do/2</a></h3>
 <div class="spec">
-<p><tt>do(Maybe::<a href="#type-maybe">maybe</a>(A), Fs::[<a href="#type-fn">fn</a>(A, <a href="#type-maybe">maybe</a>(B)) | <a href="#type-fn">fn</a>(<a href="#type-maybe">maybe</a>(B))]) -&gt; <a href="#type-maybe">maybe</a>(B)</tt><br></p>
+<p><tt>do(List::[A], Fs::[<a href="#type-fn">fn</a>(A, [B]) | <a href="#type-fn">fn</a>([B])]) -&gt; [B]</tt><br></p>
 <p> </p>
 </div>
 
 <h3 class="function"><a name="fmap-2">fmap/2</a></h3>
 <div class="spec">
-<p><tt>fmap(F::<a href="#type-fn">fn</a>(A, B), X2::<a href="#type-maybe">maybe</a>(A)) -&gt; <a href="#type-maybe">maybe</a>(B)</tt><br></p>
+<p><tt>fmap(F::<a href="#type-fn">fn</a>(A, B), List::[A]) -&gt; [B]</tt><br></p>
 <p> </p>
 </div>
 
@@ -82,37 +81,31 @@
 
 <h3 class="function"><a name="liftA2-2">liftA2/2</a></h3>
 <div class="spec">
-<p><tt>liftA2(X1::<a href="#type-maybe">maybe</a>(<a href="#type-fn">fn</a>(A, B)), Maybe::<a href="#type-maybe">maybe</a>(A)) -&gt; <a href="#type-maybe">maybe</a>(B)</tt><br></p>
+<p><tt>liftA2(List1::[<a href="#type-fn">fn</a>(A, B)], List2::[A]) -&gt; [B]</tt><br></p>
 <p> </p>
 </div>
 
 <h3 class="function"><a name="liftm-2">liftm/2</a></h3>
 <div class="spec">
-<p><tt>liftm(F::function(), Maybes::[<a href="#type-either">either</a>(term(), B)]) -&gt; <a href="#type-either">either</a>(term(), B)</tt><br></p>
-<p> </p>
-</div>
-
-<h3 class="function"><a name="liftmz-2">liftmz/2</a></h3>
-<div class="spec">
-<p><tt>liftmz(F::function(), Maybes::[<a href="#type-fn">fn</a>(<a href="#type-either">either</a>(term(), B))]) -&gt; <a href="#type-either">either</a>(term(), B)</tt><br></p>
+<p><tt>liftm(F::function(), Lists::[[term()]] | [<a href="#type-fn">fn</a>([term()])]) -&gt; [term()]</tt><br></p>
 <p> </p>
 </div>
 
 <h3 class="function"><a name="pure-1">pure/1</a></h3>
 <div class="spec">
-<p><tt>pure(A) -&gt; <a href="#type-maybe">maybe</a>(A)</tt><br></p>
+<p><tt>pure(A) -&gt; [A]</tt><br></p>
 <p> </p>
 </div>
 
 <h3 class="function"><a name="sequence-1">sequence/1</a></h3>
 <div class="spec">
-<p><tt>sequence(Maybes::<a href="#type-traversable">traversable</a>(<a href="#type-maybe">maybe</a>(A))) -&gt; <a href="#type-maybe">maybe</a>(<a href="#type-traversable">traversable</a>(A))</tt><br></p>
+<p><tt>sequence(Lists::<a href="#type-traversable">traversable</a>([A])) -&gt; [<a href="#type-traversable">traversable</a>(A)]</tt><br></p>
 <p> </p>
 </div>
 
 <h3 class="function"><a name="then-2">then/2</a></h3>
 <div class="spec">
-<p><tt>then(F::<a href="#type-fn">fn</a>(<a href="#type-maybe">maybe</a>(A)), Maybe::<a href="#type-maybe">maybe</a>(term())) -&gt; <a href="#type-maybe">maybe</a>(A)</tt><br></p>
+<p><tt>then(F::<a href="#type-fn">fn</a>([A]), List::list()) -&gt; [A]</tt><br></p>
 <p> </p>
 </div>
 <hr>

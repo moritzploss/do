@@ -1,4 +1,4 @@
 %% encoding: UTF-8
 {application,do}.
-{modules,[do_applicative,do_either,do_fn,do_functor,do_maybe,do_monad,
-          do_traversable]}.
+{modules,[do,do_applicative,do_either,do_fn,do_functor,do_list,do_maybe,
+          do_monad,do_traversable]}.
