@@ -51,7 +51,6 @@ sequence(Map, Mod, Mode) when is_map(Map) ->
   Mod:fmap(fun(Sequenced) -> maps:from_list(lists:zip(Keys, Sequenced)) end,
            sequence(Vals, Mod, Mode)).
 
-reset(?LAZY)    -> ?LAZY;
 reset(?THUNK)   -> ?LAZY;
 reset(?DEFAULT) -> ?DEFAULT.
 

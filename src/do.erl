@@ -106,4 +106,10 @@ liftA2_macro_test() ->
   ?assertEqual({error, 3}, ?liftA2({ok, F}, {error, 3})),
   ?assertEqual({error, 1}, ?liftA2({error, 1}, {ok, 3})).
 
+register_monad_test() ->
+  ?assertNot(lists:member(test, get_monads())),
+  ?assertMatch({ok, _}, register_monad(test)),
+  ?assert(lists:member(test, get_monads())),
+  ?assertMatch({error, _}, register_monad(test)).
+
 -endif.

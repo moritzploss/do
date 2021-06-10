@@ -98,6 +98,11 @@ liftm_test() ->
   ?assertEqual(error,   liftm(F, [error,   {ok, 2}, {ok, 1}])),
   ?assertEqual(error,   liftm(F, [error,   error,   {ok, 1}])).
 
+liftmz_test() ->
+  F = fun(A, B, C) -> A + B + C end,
+  ?assertEqual({ok, 4},         liftmz(F, [?thunk({ok, 1}), ?thunk({ok, 2}), ?thunk({ok, 1})])),
+  ?assertError(function_clause, liftmz(F, [{ok, 1}, ?thunk({ok, 1})])).
+
 bind_test() ->
   FOk    = fun(A) -> {ok, A + 1} end,
   FError = fun(_) -> error end,
