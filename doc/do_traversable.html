@@ -10,9 +10,10 @@
 <hr>
 
 <h1>Module do_traversable</h1>
-<ul class="index"><li><a href="#types">Data Types</a></li><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>
+<ul class="index"><li><a href="#description">Description</a></li><li><a href="#types">Data Types</a></li><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>The Traversable Type Class.
 
 
+<h2><a name="description">Description</a></h2>The Traversable Type Class.
 <h2><a name="types">Data Types</a></h2>
 
 <h3 class="typedecl"><a name="type-applicative">applicative()</a></h3>
@@ -27,6 +28,10 @@
 <p><tt>fn(A, B) = fun((A) -&gt; B)</tt></p>
 
 
+<h3 class="typedecl"><a name="type-fn">fn()</a></h3>
+<p><tt>fn(A) = fun(() -&gt; A)</tt></p>
+
+
 <h3 class="typedecl"><a name="type-maybe">maybe()</a></h3>
 <p><tt>maybe(A) = {ok, A} | error</tt></p>
 
@@ -37,6 +42,7 @@
 
 <h2><a name="index">Function Index</a></h2>
 <table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#sequence-2">sequence/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#sequence_lazy-2">sequence_lazy/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#traverse-2">traverse/2</a></td><td></td></tr>
 </table>
 
@@ -44,7 +50,13 @@
 
 <h3 class="function"><a name="sequence-2">sequence/2</a></h3>
 <div class="spec">
-<p><tt>sequence(Rest::<a href="#type-traversable">traversable</a>(<a href="#type-applicative">applicative</a>(A)), Mod::atom()) -&gt; <a href="#type-applicative">applicative</a>(<a href="#type-traversable">traversable</a>(A))</tt><br></p>
+<p><tt>sequence(Traversable::<a href="#type-traversable">traversable</a>(<a href="#type-applicative">applicative</a>(A)), Mod::atom()) -&gt; <a href="#type-applicative">applicative</a>(<a href="#type-traversable">traversable</a>(A))</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="sequence_lazy-2">sequence_lazy/2</a></h3>
+<div class="spec">
+<p><tt>sequence_lazy(Traversable::<a href="#type-traversable">traversable</a>(<a href="#type-fn">fn</a>(<a href="#type-applicative">applicative</a>(A))), Mod::atom()) -&gt; <a href="#type-applicative">applicative</a>(<a href="#type-traversable">traversable</a>(A))</tt><br></p>
 <p> </p>
 </div>
 

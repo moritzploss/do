@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% @doc The Either Type.
+%%% @doc The Either Monad.
 %%% @end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -15,8 +15,9 @@
                do/2,
                fmap/2,
                lift/1,
-               liftA2/3,
+               liftA2/2,
                liftm/2,
+               liftmz/2,
                pure/1,
                sequence/1,
                then/2]).
@@ -35,10 +36,9 @@ fmap(F, {error, A}) when ?isF1(F) -> {error, A};
 fmap(F, {ok, B})    when ?isF1(F) -> {ok, F(B)}. 
 
 %%%_* applicative -------------------------------------------------------------
--spec liftA2(fn(B, B, C), either(A1, B), either(A2, B)) -> either(A1 | A2, C).
-liftA2(F, {ok, V1}, {ok, V2}) when ?isF2(F) -> {ok, F(V1, V2)};
-liftA2(F, {error, Reason}, _) when ?isF2(F) -> {error, Reason};
-liftA2(F, _, {error, Reason}) when ?isF2(F) -> {error, Reason}.
+-spec liftA2(either(A1, fn(B, C)), either(A2, B)) -> either(A1 | A2, C).
+liftA2({ok, F}, Either) when ?isF1(F) -> fmap(F, Either);
+liftA2({error, Reason}, _)            -> {error, Reason}.
 
 -spec pure(B) -> either(_, B).
 pure(B) -> {ok, B}.
@@ -51,13 +51,16 @@ sequence(Eithers) -> do_traversable:sequence(Eithers, ?MODULE).
 bind(F, Either) when ?isF1(F) -> flat(fmap(F, Either)).
 
 -spec do(either(A, B), list(fn(B, either(C, D)) | fn(either(C, D)))) -> either(A | C, D).
-do(Either, Fs) -> do_monad:do(Either, Fs, ?MODULE).
+do(Either, Fs) -> do_monad:do(Either, Fs, [?MODULE]).
 
 -spec lift(fn(A, B)) -> fn(monad(A), monad(B)).
 lift(F) -> do_monad:lift(F, ?MODULE).
 
--spec liftm(fun(), [either(_, B)] | [fn(either(_, B))]) -> either(_, B).
+-spec liftm(fun(), [either(_, B)]) -> either(_, B).
 liftm(F, Eithers) -> do_monad:liftm(F, Eithers, ?MODULE).
+
+-spec liftmz(fun(), [fn(either(_, B))]) -> either(_, B).
+liftmz(F, Eithers) -> do_monad:liftmz(F, Eithers, ?MODULE).
 
 -spec then(fn(either(A, B)), either(_, _)) -> either(A, B).
 then(F, Either) -> do_monad:then(F, Either, ?MODULE).
@@ -82,11 +85,11 @@ lift_test() ->
   ?assertEqual({error, rsn}, Lifted({error, rsn})).
 
 liftA2_test() ->
-  F = fun(A, B) -> A + B end,
-  ?assertEqual({ok, 3},      liftA2(F, {ok, 1},      {ok, 2})),
-  ?assertEqual({error, rsn}, liftA2(F, {ok, 1},      {error, rsn})),
-  ?assertEqual({error, rsn}, liftA2(F, {error, rsn}, {ok, 2})),
-  ?assertEqual({error, rsn}, liftA2(F, {error, rsn}, {error, rsn})).
+  F = fun(A) -> A + 1 end,
+  ?assertEqual({ok, 3},      liftA2({ok, F},      {ok, 2})),
+  ?assertEqual({error, rsn}, liftA2({ok, F},      {error, rsn})),
+  ?assertEqual({error, rsn}, liftA2({error, rsn}, {ok, 2})),
+  ?assertEqual({error, rsn}, liftA2({error, rsn}, {error, rsn})).
 
 liftm_test() ->
   F = fun(A, B, C) -> A + B + C end,
@@ -113,7 +116,6 @@ do_test() ->
 
 sequence_test() ->
   ?assertEqual({ok, [1, 2, 3]},         sequence([{ok, 1}, {ok, 2}, {ok, 3}])),
-  ?assertEqual({ok, [1, 2, 3]},         sequence([{ok, 1}, ?thunk({ok, 2}), {ok, 3}])),
   ?assertEqual({error, reason},         sequence([{ok, 1}, {error, reason}, {ok, 3}])),
   ?assertEqual({ok, #{a => 1, b => 2}}, sequence(#{a => {ok, 1}, b => {ok, 2}})),
   ?assertEqual({error, reason},         sequence(#{a => {ok, 1}, b => {error, reason}})).

@@ -18,7 +18,7 @@
 
 %%%_* Code ====================================================================
 -spec fmap(fn(A, B), functor(A)) -> functor(B).
-fmap(F, List)                when ?isF1(F), is_list(List) -> lists:map(F, List);
+fmap(F, List)                when ?isF1(F), is_list(List) -> do_list:fmap(F, List);
 fmap(F, Map)                 when ?isF1(F), is_map(Map)   -> maps:map(fun(_, V) -> F(V) end, Map);
 fmap(F, Fn)                  when ?isF1(F), ?isF1(Fn)     -> do_fn:fmap(F, Fn);
 fmap(F, {error, _} = Either) when ?isF1(F)                -> do_either:fmap(F, Either);
@@ -56,7 +56,7 @@ basic_test() ->
   ?assertEqual(#{a => 2, b => 3}, fmap(F, #{a => 1, b => 2})),
   ?assertEqual(2,                 (fmap(F, fun(_) -> 1 end))(arg)).
 
-assertEqual(Expected, Actual) when is_function(Expected), is_function(Actual) ->
+assertEqual(Expected, Actual) when ?isF(Expected), ?isF(Actual) ->
   assertEqual(Expected(arg), Actual(arg));
 assertEqual(Expected, Actual) ->
   ?assertEqual(Expected, Actual).  
