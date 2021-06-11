@@ -13,9 +13,6 @@
 -export([do/3]).
 -export([then/3]).
 
--export([pure_with_ctx/1]).
--ignore_xref([pure_with_ctx/1]).
-
 %%%_* Includes ================================================================
 -include("do_macros.hrl").
 -include("do_types.hrl").
@@ -48,31 +45,17 @@ do(Monad, [F | Fs], Mods) when ?isF1(F) -> do(try_(F, Monad, bind, Mods), Fs, Mo
 -spec then(fn(monad(A)), monad(_), atom()) -> monad(A).
 then(F, Monad, Mod) when ?isF0(F) -> Mod:bind(fun(_) -> F() end, Monad).
 
-%%%_* Public Helpers ----------------------------------------------------------
-pure_with_ctx(Ctx) ->
-  Mod = get_module(Ctx),
-  fun Mod:pure/1.
-
 %%%_* Internal ----------------------------------------------------------------
 do_liftm(F, Monads, Mod, Sequence) ->
   Mod:fmap(fun(Args) -> apply(F, Args) end, Sequence(Monads, Mod)).
-
-is_monad({Mod, bind, 2, _File}, Monads) -> lists:member(Mod, Monads);
-is_monad(_Other, _Monads)               -> false.
-
-get_module(Ctx) ->
-  Monads                = do:get_monads(),
-  IsMonad               = fun(Mod) -> is_monad(Mod, Monads) end,
-  {Mod, bind, 2, _File} = hd(lists:filter(IsMonad, Ctx)),
-  Mod.
 
 try_(F, Monad, Fun, [Mod | Rest]) ->
   try
     apply(Mod, Fun, [F, Monad])
   catch
-    _:_:_ ->
-      case Rest of
-        [] -> error({error, {no_monad, Monad}});
-        _  -> try_(F, Monad, Fun, Rest)
+    error:function_clause:Trace ->
+      case {Rest, Trace} of
+        {[], [_, {Mod, bind, 2, _} | _]} -> error({error, {no_monad, Monad}});
+        {_,  [_, {Mod, bind, 2, _} | _]} -> try_(F, Monad, Fun, Rest)
       end
   end.
