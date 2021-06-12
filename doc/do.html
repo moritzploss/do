@@ -61,7 +61,7 @@
 
 <h3 class="function"><a name="bind-2">bind/2</a></h3>
 <div class="spec">
-<p><tt>bind(F::<a href="#type-fn">fn</a>(A, <a href="#type-monad">monad</a>(B)), Monad::<a href="#type-monad">monad</a>(A)) -&gt; <a href="#type-monad">monad</a>(B)</tt><br></p>
+<p><tt>bind(Monad::<a href="#type-monad">monad</a>(A), F::<a href="#type-fn">fn</a>(A, <a href="#type-monad">monad</a>(B))) -&gt; <a href="#type-monad">monad</a>(B)</tt><br></p>
 <p> </p>
 </div>
 
@@ -91,7 +91,7 @@
 
 <h3 class="function"><a name="then-2">then/2</a></h3>
 <div class="spec">
-<p><tt>then(F::<a href="#type-fn">fn</a>(<a href="#type-monad">monad</a>(B)), Monad::<a href="#type-monad">monad</a>(term())) -&gt; <a href="#type-monad">monad</a>(B)</tt><br></p>
+<p><tt>then(Monad::<a href="#type-monad">monad</a>(term()), F::<a href="#type-fn">fn</a>(<a href="#type-monad">monad</a>(B))) -&gt; <a href="#type-monad">monad</a>(B)</tt><br></p>
 <p> </p>
 </div>
 <hr>
