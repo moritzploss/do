@@ -23,7 +23,6 @@
 -callback then(monad(_), fn(monad(A))) -> monad(A).
 -callback lift(fn(A, B)) -> fn(monad(A), monad(B)).
 -callback liftm(fun(), [monad(A)] | [fn(monad(A))]) -> monad(_).
--callback is_instance(_) -> boolean().
 
 %%%_* Code ====================================================================
 %%%_* API ---------------------------------------------------------------------
@@ -38,10 +37,10 @@ liftm(F, Monads, Mod) when ?isF(F, length(Monads)) andalso is_atom(Mod) ->
 liftmz(F, Thunks, Mod) when ?isF(F, length(Thunks)) andalso is_atom(Mod) ->
   do_liftm(F, Thunks, Mod, fun do_traversable:sequence_lazy/2).
 
--spec do(monad(A), list(fn(A, monad(B)) | fn(monad(B))), [atom()]) -> monad(B).
-do(Monad, [], _Mods)                    -> Monad;
-do(Monad, [F | Fs], Mods) when ?isF0(F) -> do(run(F, Monad, then, Mods), Fs, Mods);
-do(Monad, [F | Fs], Mods) when ?isF1(F) -> do(run(F, Monad, bind, Mods), Fs, Mods).
+-spec do(monad(A), list(fn(A, monad(B)) | fn(monad(B))), atom()) -> monad(B).
+do(Monad, [], _Mod)                    -> Monad;
+do(Monad, [F | Fs], Mod) when ?isF0(F) -> do(Mod:then(Monad, F), Fs, Mod);
+do(Monad, [F | Fs], Mod) when ?isF1(F) -> do(Mod:bind(Monad, F), Fs, Mod).
 
 -spec then(monad(_), fn(monad(A)), atom()) -> monad(A).
 then(Monad, F, Mod) when ?isF0(F) -> Mod:bind(Monad, fun(_) -> F() end).
@@ -49,15 +48,3 @@ then(Monad, F, Mod) when ?isF0(F) -> Mod:bind(Monad, fun(_) -> F() end).
 %%%_* Internal ----------------------------------------------------------------
 do_liftm(F, Monads, Mod, Sequence) ->
   Mod:fmap(fun(Args) -> apply(F, Args) end, Sequence(Monads, Mod)).
-
-run(F, Monad, Fun, Mods) ->
-  Mod = get_mod(Monad, Mods),
-  apply(Mod, Fun, [Monad, F]).
-
-get_mod(Monad, [Mod | Rest]) ->
-  case Mod:is_instance(Monad) of
-    true  -> Mod;
-    false -> get_mod(Monad, Rest)
-  end;
-get_mod(Monad, _) ->
-  error({no_monad, Monad}).

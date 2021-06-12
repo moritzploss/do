@@ -35,13 +35,15 @@ fmap(F, Map)            when ?isF1(F), is_map(Map)   -> do_map:fmap(F, Map);
 fmap(F, Fn)             when ?isF1(F), ?isF1(Fn)     -> do_fn:fmap(F, Fn);
 fmap(F, {error, _} = E) when ?isF1(F)                -> do_either:fmap(F, E);
 fmap(F, {ok, _} = E)    when ?isF1(F)                -> do_either:fmap(F, E);
-fmap(F, error = M)      when ?isF1(F)                -> do_maybe:fmap(F, M).
+fmap(F, nothing = M)    when ?isF1(F)                -> do_maybe:fmap(F, M);
+fmap(F, {just, _} = M)  when ?isF1(F)                -> do_maybe:fmap(F, M).
 
 -spec liftA2(applicative(fn(A, B)), applicative(A)) -> applicative(B).
-liftA2(A1, A2) when is_list(A1), is_list(A2) -> do_list:liftA2(A1, A2);
-liftA2(error = A1, _ = A2)                   -> do_maybe:liftA2(A1, A2);
-liftA2(_ = A1, error = A2)                   -> do_maybe:liftA2(A1, A2);
-liftA2(A1, A2)                               -> do_either:liftA2(A1, A2).
+liftA2(A1, A2) when is_list(A1) -> do_list:liftA2(A1, A2);
+liftA2({ok, _} = A1, A2)        -> do_either:liftA2(A1, A2);
+liftA2({error, _} = A1, A2)     -> do_either:liftA2(A1, A2);
+liftA2({just, _} = A1, A2)      -> do_maybe:liftA2(A1, A2);
+liftA2(nothing = A1, A2)        -> do_maybe:liftA2(A1, A2).
 
 -spec pure(A) -> monad(A) | A.
 pure(A) ->
@@ -51,7 +53,11 @@ pure(A) ->
   end.
 
 -spec do(monad(A), [fn(A, monad(B)) | fn(monad(B))]) -> monad(B).
-do(Monad, Funs) -> do_monad:do(Monad, Funs, ?MONADS).
+do(Monad, Fs) when is_list(Monad) -> do_list:do(Monad, Fs);
+do({ok, _} = Monad, Fs)           -> do_either:do(Monad, Fs);
+do({error, _} = Monad, Fs)        -> do_either:do(Monad, Fs);
+do({just, _} = Monad, Fs)         -> do_maybe:do(Monad, Fs);
+do(nothing = Monad, Fs)           -> do_maybe:do(Monad, Fs).
 
 -spec bind(monad(A), fn(A, monad(B))) -> monad(B).
 bind(Monad, F) when ?isF1(F) -> do(Monad, [F]).
@@ -98,18 +104,19 @@ bind_macro_test() ->
   ?assertEqual({error, reason},  ?bind({error, reason}, F)).
 
 then_macro_test() ->
-  F = fun() -> {ok, 1} end,
-  ?assertEqual({ok, 1},          ?then({ok, 2}, F)),
-  ?assertEqual({error, reason},  ?then({error, reason}, F)).
+  ?assertEqual({ok, 1},          ?then({ok, 2}, {ok, 1})),
+  ?assertEqual({ok, 1},          ?then({ok, 2}, {ok, 1})),
+  ?assertEqual({error, reason},  ?then({error, reason}, {ok, 1})).
 
 do_macro_test() ->
-  Fun0 = fun() -> ?pure(3) end,
-  Fun = fun(A) -> ?pure(A + 1) end,
-  ?assertEqual({ok, 4},         ?do({ok, 3},         [Fun0, Fun])),
-  ?assertEqual({error, reason}, ?do({error, reason}, [Fun])),
-  ?assertEqual(error,           ?do(error,           [Fun])),
-  ?assertError({no_monad, foo}, ?do(foo,             [Fun])),
-  ?assertEqual([2],             ?do([1],             [Fun])).
+  Fun0 = fun()  -> ?pure(3) end,
+  Fun1 = fun(A) -> ?pure(A + 1) end,
+  Fun2 = fun(_) -> nothing end,
+  ?assertEqual({ok, 4},         ?do({ok, 3},         [Fun0, Fun1])),
+  ?assertEqual(nothing,         ?do({just, 3},       [Fun0, Fun2])),
+  ?assertEqual({error, reason}, ?do({error, reason}, [Fun1])),
+  ?assertEqual(nothing,         ?do(nothing,         [Fun1])),
+  ?assertEqual([2],             ?do([1],             [Fun1])).
 
 liftm_macro_test() ->
   F = fun(A, B, C) -> A + B + C end,
@@ -123,8 +130,8 @@ liftA2_macro_test() ->
   ?assertEqual({ok, 3},    ?liftA2({ok, F}, {ok, 2})),
   ?assertEqual({error, 3}, ?liftA2({ok, F}, {error, 3})),
   ?assertEqual({error, 1}, ?liftA2({error, 1}, {ok, 3})),
-  ?assertEqual(error,      ?liftA2(error, {ok, 1})),
-  ?assertEqual(error,      ?liftA2({ok, F}, error)),
+  ?assertEqual(nothing,    ?liftA2(nothing, {just, 1})),
+  ?assertEqual(nothing,    ?liftA2({just, F}, nothing)),
   ?assertEqual([2, 3],     ?liftA2([F], [1, 2])).
 
 -endif.

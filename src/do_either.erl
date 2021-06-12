@@ -20,8 +20,7 @@
                liftmz/2,
                pure/1,
                sequence/1,
-               then/2,
-               is_instance/1]).
+               then/2]).
 -export(?API).
 -ignore_xref(?API).
 
@@ -52,7 +51,7 @@ sequence(Eithers) -> do_traversable:sequence(Eithers, ?MODULE).
 bind(Either, F) when ?isF1(F) -> flat(fmap(F, Either)).
 
 -spec do(either(A, B), [fn(B, either(C, D)) | fn(either(C, D))]) -> either(A | C, D).
-do(Either, Fs) -> do_monad:do(Either, Fs, [?MODULE]).
+do(Either, Fs) -> do_monad:do(Either, Fs, ?MODULE).
 
 -spec lift(fn(A, B)) -> fn(monad(A), monad(B)).
 lift(F) -> do_monad:lift(F, ?MODULE).
@@ -65,11 +64,6 @@ liftmz(F, Eithers) -> do_monad:liftmz(F, Eithers, ?MODULE).
 
 -spec then(either(A, _), fn(either(B, C))) -> either(A | B, C).
 then(Either, F) -> do_monad:then(Either, F, ?MODULE).
-
--spec is_instance(_) -> boolean().
-is_instance({ok, _})    -> true;
-is_instance({error, _}) -> true;
-is_instance(_)          -> false.
 
 %%%_* internal ----------------------------------------------------------------
 flat({ok, {error, A}}) -> {error, A};
