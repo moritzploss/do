@@ -10,6 +10,7 @@
 -define(API, [ do/2,
                bind/2,
                then/2,
+               pure/1,
                register_monad/1,
                get_monads/0]).
 -export(?API).
@@ -24,6 +25,11 @@
 -define(MONADS, [do_either, do_list, do_maybe]).
 -define(KEY,    {?MODULE, monads}).
 
+-define(TRACE,  element(2, process_info(self(), current_stacktrace))).
+-define(FMAP,   {_, _, 2, _}).
+-define(TRY_,   {do_monad, try_, 4, _}).
+-define(DO,     {do_monad, do, 3, _}).
+
 %%%_* Code ====================================================================
 %%%_* API ---------------------------------------------------------------------
 -spec do(monad(A), list(fn(A, monad(B)) | fn(monad(B)))) -> monad(B).
@@ -34,6 +40,13 @@ bind(F, Monad) when ?isF1(F) -> do(Monad, [F]).
 
 -spec then(fn(monad(B)), monad(_)) -> monad(B).
 then(F, Monad) when ?isF0(F) -> do(Monad, [F]).
+
+-spec pure(A) -> monad(A) | A.
+pure(A) ->
+  case ?TRACE of
+    [_, ?FMAP, {Monad, bind, 2, _}, ?TRY_, ?DO | _] -> Monad:pure(A);
+    _Trace                                          -> A
+  end.
 
 -spec register_monad(atom()) -> either(duplicate_monad, ok).
 register_monad(Mod) when is_atom(Mod) ->
@@ -73,6 +86,22 @@ lift_macro_test() ->
 
 sequence_macro_test() ->
   ?assertEqual({ok, [1, 2]}, ?sequence([{ok, 1}, {ok, 2}])).
+
+pure_test() ->
+  F = fun(A) -> ?pure(A + 1) end,
+  ?assertEqual(1,       ?pure(1)),
+  ?assertEqual({ok, 2}, ?bind(F, {ok, 1})),
+  ?assertEqual({ok, 2}, ?bind(F, {ok, 1})).
+
+pure_nested_do_test() ->
+  F     = fun(N) -> ?pure(N + 1) end,
+  Outer = ?do(do_either:pure(1), [
+              fun(M) ->
+                Inner = ?do(do_list:pure(M), [F, F]),
+                ?assertEqual([3], Inner),
+                F(hd(Inner))
+              end]),
+  ?assertEqual({ok, 4}, Outer).
 
 bind_macro_test() ->
   F = fun(A) -> {ok, A + 1} end,
