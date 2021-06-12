@@ -50,16 +50,16 @@ sequence(Maybes) -> do_traversable:sequence(Maybes, ?MODULE).
 -spec bind(fn(A, maybe(B)), maybe(A)) -> maybe(B).
 bind(F, Maybe) when ?isF1(F) -> flat(fmap(F, Maybe)).
 
--spec do(maybe(A), list(fn(A, maybe(B)) | fn(maybe(B)))) -> maybe(B).
+-spec do(maybe(A), [fn(A, maybe(B)) | fn(maybe(B))]) -> maybe(B).
 do(Maybe, Fs) -> do_monad:do(Maybe, Fs, [?MODULE]).
 
 -spec lift(fn(A, B)) -> fn(monad(A), monad(B)).
 lift(F) -> do_monad:lift(F, ?MODULE).
 
--spec liftm(fun(), [either(_, B)]) -> either(_, B).
+-spec liftm(fun(), [maybe(A)]) -> maybe(A).
 liftm(F, Maybes) -> do_monad:liftm(F, Maybes, ?MODULE).
 
--spec liftmz(fun(), [fn(either(_, B))]) -> either(_, B).
+-spec liftmz(fun(), [fn(maybe(A))]) -> maybe(A).
 liftmz(F, Maybes) -> do_monad:liftmz(F, Maybes, ?MODULE).
 
 -spec then(fn(maybe(A)), maybe(_)) -> maybe(A).

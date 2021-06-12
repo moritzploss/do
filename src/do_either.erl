@@ -50,7 +50,7 @@ sequence(Eithers) -> do_traversable:sequence(Eithers, ?MODULE).
 -spec bind(fn(A, either(B, C)), either(D, A)) -> either(B | D, C).
 bind(F, Either) when ?isF1(F) -> flat(fmap(F, Either)).
 
--spec do(either(A, B), list(fn(B, either(C, D)) | fn(either(C, D)))) -> either(A | C, D).
+-spec do(either(A, B), [fn(B, either(C, D)) | fn(either(C, D))]) -> either(A | C, D).
 do(Either, Fs) -> do_monad:do(Either, Fs, [?MODULE]).
 
 -spec lift(fn(A, B)) -> fn(monad(A), monad(B)).
