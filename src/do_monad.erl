@@ -18,11 +18,12 @@
 -include("do_types.hrl").
 
 %%%_* Callbacks ===============================================================
--callback bind(fn(A, monad(B)), monad(A)) -> monad(B).
+-callback bind(monad(A), fn(A, monad(B))) -> monad(B).
 -callback do(monad(_), list(fn(_, monad(_)))) -> monad(_).
--callback then(fn(monad(A)), monad(_)) -> monad(A).
+-callback then(monad(_), fn(monad(A))) -> monad(A).
 -callback lift(fn(A, B)) -> fn(monad(A), monad(B)).
 -callback liftm(fun(), [monad(A)] | [fn(monad(A))]) -> monad(_).
+-callback is_instance(_) -> boolean().
 
 %%%_* Code ====================================================================
 %%%_* API ---------------------------------------------------------------------
@@ -39,23 +40,24 @@ liftmz(F, Thunks, Mod) when ?isF(F, length(Thunks)) andalso is_atom(Mod) ->
 
 -spec do(monad(A), list(fn(A, monad(B)) | fn(monad(B))), [atom()]) -> monad(B).
 do(Monad, [], _Mods)                    -> Monad;
-do(Monad, [F | Fs], Mods) when ?isF0(F) -> do(try_(F, Monad, then, Mods), Fs, Mods);
-do(Monad, [F | Fs], Mods) when ?isF1(F) -> do(try_(F, Monad, bind, Mods), Fs, Mods).
+do(Monad, [F | Fs], Mods) when ?isF0(F) -> do(run(F, Monad, then, Mods), Fs, Mods);
+do(Monad, [F | Fs], Mods) when ?isF1(F) -> do(run(F, Monad, bind, Mods), Fs, Mods).
 
--spec then(fn(monad(A)), monad(_), atom()) -> monad(A).
-then(F, Monad, Mod) when ?isF0(F) -> Mod:bind(fun(_) -> F() end, Monad).
+-spec then(monad(_), fn(monad(A)), atom()) -> monad(A).
+then(Monad, F, Mod) when ?isF0(F) -> Mod:bind(Monad, fun(_) -> F() end).
 
 %%%_* Internal ----------------------------------------------------------------
 do_liftm(F, Monads, Mod, Sequence) ->
   Mod:fmap(fun(Args) -> apply(F, Args) end, Sequence(Monads, Mod)).
 
-try_(F, Monad, Fun, [Mod | Rest]) ->
-  try
-    apply(Mod, Fun, [F, Monad])
-  catch
-    error:function_clause:Trace ->
-      case {Rest, Trace} of
-        {[], [_, {Mod, bind, 2, _} | _]} -> error({error, {no_monad, Monad}});
-        {_,  [_, {Mod, bind, 2, _} | _]} -> try_(F, Monad, Fun, Rest)
-      end
-  end.
+run(F, Monad, Fun, Mods) ->
+  Mod = get_mod(Monad, Mods),
+  apply(Mod, Fun, [Monad, F]).
+
+get_mod(Monad, [Mod | Rest]) ->
+  case Mod:is_instance(Monad) of
+    true  -> Mod;
+    false -> get_mod(Monad, Rest)
+  end;
+get_mod(Monad, _) ->
+  error({no_monad, Monad}).

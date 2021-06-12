@@ -49,6 +49,7 @@
 <table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#bind-2">bind/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#do-2">do/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#fmap-2">fmap/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#is_instance-1">is_instance/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#lift-1">lift/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#liftA2-2">liftA2/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#liftm-2">liftm/2</a></td><td></td></tr>
@@ -62,7 +63,7 @@
 
 <h3 class="function"><a name="bind-2">bind/2</a></h3>
 <div class="spec">
-<p><tt>bind(F::<a href="#type-fn">fn</a>(A, <a href="#type-either">either</a>(B, C)), Either::<a href="#type-either">either</a>(D, A)) -&gt; <a href="#type-either">either</a>(B | D, C)</tt><br></p>
+<p><tt>bind(Either::<a href="#type-either">either</a>(D, A), F::<a href="#type-fn">fn</a>(A, <a href="#type-either">either</a>(B, C))) -&gt; <a href="#type-either">either</a>(B | D, C)</tt><br></p>
 <p> </p>
 </div>
 
@@ -75,6 +76,12 @@
 <h3 class="function"><a name="fmap-2">fmap/2</a></h3>
 <div class="spec">
 <p><tt>fmap(F::<a href="#type-fn">fn</a>(B, C), X2::<a href="#type-either">either</a>(A, B)) -&gt; <a href="#type-either">either</a>(A, C)</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="is_instance-1">is_instance/1</a></h3>
+<div class="spec">
+<p><tt>is_instance(X1::term()) -&gt; boolean()</tt><br></p>
 <p> </p>
 </div>
 
@@ -116,7 +123,7 @@
 
 <h3 class="function"><a name="then-2">then/2</a></h3>
 <div class="spec">
-<p><tt>then(F::<a href="#type-fn">fn</a>(<a href="#type-either">either</a>(A, B)), Either::<a href="#type-either">either</a>(term(), term())) -&gt; <a href="#type-either">either</a>(A, B)</tt><br></p>
+<p><tt>then(Either::<a href="#type-either">either</a>(A, term()), F::<a href="#type-fn">fn</a>(<a href="#type-either">either</a>(B, C))) -&gt; <a href="#type-either">either</a>(A | B, C)</tt><br></p>
 <p> </p>
 </div>
 <hr>

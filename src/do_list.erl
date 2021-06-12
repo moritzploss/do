@@ -19,7 +19,8 @@
                liftm/2,
                pure/1,
                sequence/1,
-               then/2]).
+               then/2,
+               is_instance/1]).
 -export(?API).
 -ignore_xref(?API).
 
@@ -44,8 +45,8 @@ pure(A) -> [A].
 sequence(Lists) -> do_traversable:sequence(Lists, ?MODULE).
 
 %%%_* monad -------------------------------------------------------------------
--spec bind(fn(A, [B]), [A]) -> [B].
-bind(F, List) when ?isF1(F) -> flat(fmap(F, List)).
+-spec bind([A], fn(A, [B])) -> [B].
+bind(List, F) when ?isF1(F) -> flat(fmap(F, List)).
 
 -spec do([A], [fn(A, [B]) | fn([B])]) -> [B].
 do(List, Fs) -> do_monad:do(List, Fs, [?MODULE]).
@@ -56,8 +57,11 @@ lift(F) -> do_monad:lift(F, ?MODULE).
 -spec liftm(fun(), [list()] | [fn(list())]) -> list().
 liftm(F, Lists) -> do_monad:liftm(F, Lists, ?MODULE).
 
--spec then(fn([A]), list()) -> [A].
-then(F, List) -> do_monad:then(F, List, ?MODULE).
+-spec then(list(), fn([A])) -> [A].
+then(List, F) -> do_monad:then(List, F, ?MODULE).
+
+-spec is_instance(_) -> boolean().
+is_instance(Term) -> is_list(Term).
 
 %%%_* internal ----------------------------------------------------------------
 flat(List) -> lists:concat(List).

@@ -25,7 +25,6 @@
 -define(MONADS, [do_either, do_list, do_maybe]).
 -define(TRACE,  element(2, process_info(self(), current_stacktrace))).
 -define(FMAP,   {_, _, 2, _}).
--define(TRY_,   {do_monad, try_, 4, _}).
 -define(DO,     {do_monad, do, 3, _}).
 
 %%%_* Code ====================================================================
@@ -47,18 +46,18 @@ liftA2(A1, A2)                               -> do_either:liftA2(A1, A2).
 -spec pure(A) -> monad(A) | A.
 pure(A) ->
   case ?TRACE of
-    [_, ?FMAP, {Monad, bind, 2, _}, ?TRY_, ?DO | _] -> Monad:pure(A);
-    _Trace                                          -> A
+    [_, ?FMAP, {Monad, bind, 2, _}, ?DO | _] -> Monad:pure(A);
+    _Trace                                   -> A
   end.
 
 -spec do(monad(A), [fn(A, monad(B)) | fn(monad(B))]) -> monad(B).
 do(Monad, Funs) -> do_monad:do(Monad, Funs, ?MONADS).
 
--spec bind(fn(A, monad(B)), monad(A)) -> monad(B).
-bind(F, Monad) when ?isF1(F) -> do(Monad, [F]).
+-spec bind(monad(A), fn(A, monad(B))) -> monad(B).
+bind(Monad, F) when ?isF1(F) -> do(Monad, [F]).
 
--spec then(fn(monad(B)), monad(_)) -> monad(B).
-then(F, Monad) when ?isF0(F) -> do(Monad, [F]).
+-spec then(monad(_), fn(monad(B))) -> monad(B).
+then(Monad, F) when ?isF0(F) -> do(Monad, [F]).
 
 %%%_* Tests ===================================================================
 -ifdef(TEST).
@@ -80,8 +79,8 @@ sequence_macro_test() ->
 pure_test() ->
   F = fun(A) -> ?pure(A + 1) end,
   ?assertEqual(1,       ?pure(1)),
-  ?assertEqual({ok, 2}, ?bind(F, {ok, 1})),
-  ?assertEqual({ok, 2}, ?bind(F, {ok, 1})).
+  ?assertEqual({ok, 2}, ?bind({ok, 1}, F)),
+  ?assertEqual({ok, 2}, ?bind({ok, 1}, F)).
 
 pure_nested_do_test() ->
   F     = fun(N) -> ?pure(N + 1) end,
@@ -95,22 +94,22 @@ pure_nested_do_test() ->
 
 bind_macro_test() ->
   F = fun(A) -> {ok, A + 1} end,
-  ?assertEqual({ok, 3},          ?bind(F, {ok, 2})),
-  ?assertEqual({error, reason},  ?bind(F, {error, reason})).
+  ?assertEqual({ok, 3},          ?bind({ok, 2}, F)),
+  ?assertEqual({error, reason},  ?bind({error, reason}, F)).
 
 then_macro_test() ->
   F = fun() -> {ok, 1} end,
-  ?assertEqual({ok, 1},          ?then(F, {ok, 2})),
-  ?assertEqual({error, reason},  ?then(F, {error, reason})).
+  ?assertEqual({ok, 1},          ?then({ok, 2}, F)),
+  ?assertEqual({error, reason},  ?then({error, reason}, F)).
 
 do_macro_test() ->
   Fun0 = fun() -> ?pure(3) end,
   Fun = fun(A) -> ?pure(A + 1) end,
-  ?assertEqual({ok, 4},                  ?do({ok, 3},         [Fun0, Fun])),
-  ?assertEqual({error, reason},          ?do({error, reason}, [Fun])),
-  ?assertEqual(error,                    ?do(error,           [Fun])),
-  ?assertError({error, {no_monad, foo}}, ?do(foo,             [Fun])),
-  ?assertEqual([2],                      ?do([1],             [Fun])).
+  ?assertEqual({ok, 4},         ?do({ok, 3},         [Fun0, Fun])),
+  ?assertEqual({error, reason}, ?do({error, reason}, [Fun])),
+  ?assertEqual(error,           ?do(error,           [Fun])),
+  ?assertError({no_monad, foo}, ?do(foo,             [Fun])),
+  ?assertEqual([2],             ?do([1],             [Fun])).
 
 liftm_macro_test() ->
   F = fun(A, B, C) -> A + B + C end,

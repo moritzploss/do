@@ -20,7 +20,8 @@
                liftmz/2,
                pure/1,
                sequence/1,
-               then/2]).
+               then/2,
+               is_instance/1]).
 -export(?API).
 -ignore_xref(?API).
 
@@ -47,8 +48,8 @@ pure(A) -> {ok, A}.
 sequence(Maybes) -> do_traversable:sequence(Maybes, ?MODULE).
 
 %%%_* monad -------------------------------------------------------------------
--spec bind(fn(A, maybe(B)), maybe(A)) -> maybe(B).
-bind(F, Maybe) when ?isF1(F) -> flat(fmap(F, Maybe)).
+-spec bind(maybe(A), fn(A, maybe(B))) -> maybe(B).
+bind(Maybe, F) when ?isF1(F) -> flat(fmap(F, Maybe)).
 
 -spec do(maybe(A), [fn(A, maybe(B)) | fn(maybe(B))]) -> maybe(B).
 do(Maybe, Fs) -> do_monad:do(Maybe, Fs, [?MODULE]).
@@ -62,8 +63,13 @@ liftm(F, Maybes) -> do_monad:liftm(F, Maybes, ?MODULE).
 -spec liftmz(fun(), [fn(maybe(A))]) -> maybe(A).
 liftmz(F, Maybes) -> do_monad:liftmz(F, Maybes, ?MODULE).
 
--spec then(fn(maybe(A)), maybe(_)) -> maybe(A).
-then(F, Maybe) -> do_monad:then(F, Maybe, ?MODULE).
+-spec then(maybe(_), fn(maybe(A))) -> maybe(A).
+then(Maybe, F) -> do_monad:then(Maybe, F, ?MODULE).
+
+-spec is_instance(_) -> boolean().
+is_instance({ok, _}) -> true;
+is_instance(error)   -> true;
+is_instance(_)       -> false.
 
 %%%_* internal ----------------------------------------------------------------
 flat({ok, error})   -> error;
@@ -106,10 +112,10 @@ liftmz_test() ->
 bind_test() ->
   FOk    = fun(A) -> {ok, A + 1} end,
   FError = fun(_) -> error end,
-  ?assertEqual({ok, 3}, bind(FOk, {ok, 2})),
-  ?assertEqual(error,   bind(FOk, error)),
-  ?assertEqual(error,   bind(FError, {ok, 2})),
-  ?assertEqual(error,   bind(FError, error)).
+  ?assertEqual({ok, 3}, bind({ok, 2},FOk)),
+  ?assertEqual(error,   bind(error, FOk)),
+  ?assertEqual(error,   bind({ok, 2}, FError)),
+  ?assertEqual(error,   bind(error, FError)).
 
 sequence_test() ->
   ?assertEqual({ok, [1, 2, 3]},         sequence([{ok, 1}, {ok, 2}, {ok, 3}])),

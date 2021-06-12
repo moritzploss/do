@@ -20,7 +20,8 @@
                liftmz/2,
                pure/1,
                sequence/1,
-               then/2]).
+               then/2,
+               is_instance/1]).
 -export(?API).
 -ignore_xref(?API).
 
@@ -47,8 +48,8 @@ pure(B) -> {ok, B}.
 sequence(Eithers) -> do_traversable:sequence(Eithers, ?MODULE).
 
 %%%_* monad -------------------------------------------------------------------
--spec bind(fn(A, either(B, C)), either(D, A)) -> either(B | D, C).
-bind(F, Either) when ?isF1(F) -> flat(fmap(F, Either)).
+-spec bind(either(D, A), fn(A, either(B, C))) -> either(B | D, C).
+bind(Either, F) when ?isF1(F) -> flat(fmap(F, Either)).
 
 -spec do(either(A, B), [fn(B, either(C, D)) | fn(either(C, D))]) -> either(A | C, D).
 do(Either, Fs) -> do_monad:do(Either, Fs, [?MODULE]).
@@ -62,8 +63,13 @@ liftm(F, Eithers) -> do_monad:liftm(F, Eithers, ?MODULE).
 -spec liftmz(fun(), [fn(either(_, B))]) -> either(_, B).
 liftmz(F, Eithers) -> do_monad:liftmz(F, Eithers, ?MODULE).
 
--spec then(fn(either(A, B)), either(_, _)) -> either(A, B).
-then(F, Either) -> do_monad:then(F, Either, ?MODULE).
+-spec then(either(A, _), fn(either(B, C))) -> either(A | B, C).
+then(Either, F) -> do_monad:then(Either, F, ?MODULE).
+
+-spec is_instance(_) -> boolean().
+is_instance({ok, _})    -> true;
+is_instance({error, _}) -> true;
+is_instance(_)          -> false.
 
 %%%_* internal ----------------------------------------------------------------
 flat({ok, {error, A}}) -> {error, A};
@@ -101,10 +107,10 @@ liftm_test() ->
 bind_test() ->
   FOk    = fun(A) -> {ok, A + 1} end,
   FError = fun(_) -> {error, reason} end,
-  ?assertEqual({ok, 3},          bind(FOk, {ok, 2})),
-  ?assertEqual({error, reason},  bind(FOk, {error, reason})),
-  ?assertEqual({error, reason},  bind(FError, {ok, 2})),
-  ?assertEqual({error, reason1}, bind(FError, {error, reason1})).
+  ?assertEqual({ok, 3},          bind({ok, 2}, FOk)),
+  ?assertEqual({error, reason},  bind({error, reason}, FOk)),
+  ?assertEqual({error, reason},  bind({ok, 2}, FError)),
+  ?assertEqual({error, reason1}, bind({error, reason1}, FError)).
 
 do_test() ->
   Fun0 = fun() -> ?pure(3) end,
