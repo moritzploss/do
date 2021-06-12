@@ -16,6 +16,10 @@
 <h2><a name="description">Description</a></h2>The Do Module.
 <h2><a name="types">Data Types</a></h2>
 
+<h3 class="typedecl"><a name="type-applicative">applicative()</a></h3>
+<p><tt>applicative(A) = [A] | <a href="#type-fn">fn</a>(term(), A) | <a href="#type-either">either</a>(term(), A) | <a href="#type-maybe">maybe</a>(A)</tt></p>
+
+
 <h3 class="typedecl"><a name="type-either">either()</a></h3>
 <p><tt>either(A, B) = {error, A} | {ok, B}</tt></p>
 
@@ -26,6 +30,14 @@
 
 <h3 class="typedecl"><a name="type-fn">fn()</a></h3>
 <p><tt>fn(A) = fun(() -&gt; A)</tt></p>
+
+
+<h3 class="typedecl"><a name="type-functor">functor()</a></h3>
+<p><tt>functor(A) = [A] | <a href="#type-map">map</a>(A) | <a href="#type-fn">fn</a>(term(), A) | <a href="#type-either">either</a>(term(), A) | <a href="#type-maybe">maybe</a>(A)</tt></p>
+
+
+<h3 class="typedecl"><a name="type-map">map()</a></h3>
+<p><tt>map(A) = #{term() := A}</tt></p>
 
 
 <h3 class="typedecl"><a name="type-maybe">maybe()</a></h3>
@@ -39,9 +51,9 @@
 <h2><a name="index">Function Index</a></h2>
 <table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#bind-2">bind/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#do-2">do/2</a></td><td></td></tr>
-<tr><td valign="top"><a href="#get_monads-0">get_monads/0</a></td><td></td></tr>
+<tr><td valign="top"><a href="#fmap-2">fmap/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#liftA2-2">liftA2/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#pure-1">pure/1</a></td><td></td></tr>
-<tr><td valign="top"><a href="#register_monad-1">register_monad/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#then-2">then/2</a></td><td></td></tr>
 </table>
 
@@ -59,21 +71,21 @@
 <p> </p>
 </div>
 
-<h3 class="function"><a name="get_monads-0">get_monads/0</a></h3>
+<h3 class="function"><a name="fmap-2">fmap/2</a></h3>
 <div class="spec">
-<p><tt>get_monads() -&gt; [atom()]</tt><br></p>
+<p><tt>fmap(F::<a href="#type-fn">fn</a>(A, B), List::<a href="#type-functor">functor</a>(A)) -&gt; <a href="#type-functor">functor</a>(B)</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="liftA2-2">liftA2/2</a></h3>
+<div class="spec">
+<p><tt>liftA2(A1::<a href="#type-applicative">applicative</a>(<a href="#type-fn">fn</a>(A, B)), A2::<a href="#type-applicative">applicative</a>(A)) -&gt; <a href="#type-applicative">applicative</a>(B)</tt><br></p>
 <p> </p>
 </div>
 
 <h3 class="function"><a name="pure-1">pure/1</a></h3>
 <div class="spec">
 <p><tt>pure(A) -&gt; <a href="#type-monad">monad</a>(A) | A</tt><br></p>
-<p> </p>
-</div>
-
-<h3 class="function"><a name="register_monad-1">register_monad/1</a></h3>
-<div class="spec">
-<p><tt>register_monad(Mod::atom()) -&gt; <a href="#type-either">either</a>(duplicate_monad, ok)</tt><br></p>
 <p> </p>
 </div>
 
