@@ -11,11 +11,11 @@ implementations for commonly used class instances.
 To install the latest version of `do` from [`hex`](https://hex.pm/packages/do),
 add `do` to the `deps` in your rebar config file:
 
-    {do, "1.3.0"}
+    {do, "1.4.0"}
 
 ### What's in the box
 
-By default, `do` provides implementations for `either`, `list` and `maybe`
+The `do` package provides implementations for `either`, `list` and `maybe`
 monads, as well as a range of useful functors. See
 [do_types.hrl](./include/do_types.hrl) for type definitions. 
 
@@ -40,7 +40,7 @@ fmap_example() ->
 The `?do` macro consecutively executes functions inside monads. The macro
 takes a start value (a monad), and a list of functions. The functions must
 each take either 0 or 1 argument(s) and must return a monad. On execution,
-the start value is passed to the first function in the provided list, and
+the start value is passed to the first function in the provided list, and is
 then piped through consecutive functions using `bind`.
 
 ```erlang

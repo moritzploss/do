@@ -5,11 +5,13 @@
 
 -type fn(A, B, C)    :: fun((A, B) -> C).
 
+-type map(A)         :: #{_ := A}.
+
 -type either(A, B)   :: {error, A} | {ok, B}.
 
 -type maybe(A)       :: {ok, A} | error.
 
--type traversable(A) :: [A] | #{_ := A}.
+-type traversable(A) :: [A] | map(A).
 
 -type applicative(A) :: [A]
                         | fn(_, A)
@@ -17,7 +19,7 @@
                         | maybe(A).
 
 -type functor(A)     :: [A]
-                        | #{_ := A}
+                        | map(A)
                         | fn(_, A)
                         | either(_, A)
                         | maybe(A).

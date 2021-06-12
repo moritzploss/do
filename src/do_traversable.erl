@@ -36,7 +36,7 @@ sequence_lazy(Traversable, Mod) ->
 
 -spec traverse(fn(A, applicative(B)), traversable(A)) ->
   applicative(traversable(B)).
-traverse(F, Traversable) when ?isF1(F) -> do_functor:fmap(F, Traversable).
+traverse(F, Traversable) when ?isF1(F) -> do:fmap(F, Traversable).
 
 %%%_* internal ----------------------------------------------------------------
 sequence([F | Rest], Mod, ?LAZY) when ?isF0(F) ->

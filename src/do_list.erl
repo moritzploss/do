@@ -35,8 +35,7 @@ fmap(F, List) when ?isF1(F) -> lists:map(F, List).
 
 %%%_* applicative -------------------------------------------------------------
 -spec liftA2([fn(A, B)], [A]) -> [B].
-liftA2(List1, List2) ->
-  flat(fmap(fun(F) -> fmap(F, List2) end, List1)).
+liftA2(List1, List2) -> flat(fmap(fun(F) -> fmap(F, List2) end, List1)).
 
 -spec pure(A) -> [A].
 pure(A) -> [A].
@@ -48,13 +47,13 @@ sequence(Lists) -> do_traversable:sequence(Lists, ?MODULE).
 -spec bind(fn(A, [B]), [A]) -> [B].
 bind(F, List) when ?isF1(F) -> flat(fmap(F, List)).
 
--spec do([A], list(fn(A, [B]) | fn([B]))) -> [B].
+-spec do([A], [fn(A, [B]) | fn([B])]) -> [B].
 do(List, Fs) -> do_monad:do(List, Fs, [?MODULE]).
 
 -spec lift(fn(A, B)) -> fn(monad(A), monad(B)).
 lift(F) -> do_monad:lift(F, ?MODULE).
 
--spec liftm(fun(), [[_]] | [fn([_])]) -> [_].
+-spec liftm(fun(), [list()] | [fn(list())]) -> list().
 liftm(F, Lists) -> do_monad:liftm(F, Lists, ?MODULE).
 
 -spec then(fn([A]), list()) -> [A].
@@ -81,13 +80,17 @@ liftA2_test() ->
   ?assertEqual([],                          liftA2(Applicative, [])),
   ?assertEqual([],                          liftA2([],          [1, 2, 3])).
 
-sequence_test() ->
+sequence_list_test() ->
   ?assertEqual([],                                               sequence([[]])),
   ?assertEqual([[1]],                                            sequence([[1]])),
   ?assertEqual([[1, 2, 3]],                                      sequence([[1], [2], [3]])),
   ?assertEqual([],                                               sequence([[1, 2], []])),
   ?assertEqual([],                                               sequence([[], [1, 2]])),
   ?assertEqual([[1, 3], [1, 4], [1, 5], [2, 3], [2, 4], [2, 5]], sequence([[1, 2], [3, 4, 5]])).
+
+sequence_map_test() ->
+  ?assertEqual([#{a => 1, b => 2}],                    sequence(#{a => [1], b => [2]})),
+  ?assertEqual([#{a => 1, b => 2}, #{a => 1, b => 3}], sequence(#{a => [1], b => [2, 3]})).
 
 do_test() ->
   Fun0 = fun() -> ?pure(3) end,

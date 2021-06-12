@@ -1,18 +1,16 @@
 %%%_* Macros ==================================================================
--define(fmap(F, Functor),      do_functor:fmap(F, Functor)).
-
--define(sequence(Traversable), do_either:sequence(Traversable)).
--define(lift(F),               do_either:lift(F)).
--define(liftA2(A1, A2),        do_either:liftA2(A1, A2)).
-
--define(do(Monad, Funs),       do:do(Monad, Funs)).
--define(bind(F, Monad),        do:bind(F, Monad)).
--define(then(F, Monad),        do:then(F, Monad)).
--define(pure(A),               do:pure(A)).
-
 -define(thunk(A),              fun() -> A end).
 -define(f(F),                  ?thunk(F)).
 
+-define(fmap(F, Functor),      do:fmap(F, Functor)).
+-define(liftA2(A1, A2),        do:liftA2(A1, A2)).
+-define(pure(A),               do:pure(A)).
+-define(do(Monad, Fs),         do:do(Monad, Fs)).
+-define(bind(F, Monad),        do:bind(F, Monad)).
+-define(then(F, Monad),        do:then(F, Monad)).
+
+-define(sequence(Traversable), do_either:sequence(Traversable)).
+-define(lift(F),               do_either:lift(F)).
 -define(liftm(F, A1),
         do_either:liftmz(F, [?f(A1)])).
 -define(liftm(F, A1, A2),

@@ -7,12 +7,12 @@
 -module(do).
 
 %%%_* Exports =================================================================
--define(API, [ do/2,
-               bind/2,
-               then/2,
+-define(API, [ fmap/2,
+               liftA2/2,
                pure/1,
-               register_monad/1,
-               get_monads/0]).
+               do/2,
+               bind/2,
+               then/2]).
 -export(?API).
 -ignore_xref(?API).
 
@@ -23,8 +23,6 @@
 
 %%%_* Macros ==================================================================
 -define(MONADS, [do_either, do_list, do_maybe]).
--define(KEY,    {?MODULE, monads}).
-
 -define(TRACE,  element(2, process_info(self(), current_stacktrace))).
 -define(FMAP,   {_, _, 2, _}).
 -define(TRY_,   {do_monad, try_, 4, _}).
@@ -32,14 +30,19 @@
 
 %%%_* Code ====================================================================
 %%%_* API ---------------------------------------------------------------------
--spec do(monad(A), list(fn(A, monad(B)) | fn(monad(B)))) -> monad(B).
-do(Monad, Funs) -> do_monad:do(Monad, Funs, get_monads()).
+-spec fmap(fn(A, B), functor(A)) -> functor(B).
+fmap(F, List)           when ?isF1(F), is_list(List) -> do_list:fmap(F, List);
+fmap(F, Map)            when ?isF1(F), is_map(Map)   -> do_map:fmap(F, Map);
+fmap(F, Fn)             when ?isF1(F), ?isF1(Fn)     -> do_fn:fmap(F, Fn);
+fmap(F, {error, _} = E) when ?isF1(F)                -> do_either:fmap(F, E);
+fmap(F, {ok, _} = E)    when ?isF1(F)                -> do_either:fmap(F, E);
+fmap(F, error = M)      when ?isF1(F)                -> do_maybe:fmap(F, M).
 
--spec bind(fn(A, monad(B)), monad(A)) -> monad(B).
-bind(F, Monad) when ?isF1(F) -> do(Monad, [F]).
-
--spec then(fn(monad(B)), monad(_)) -> monad(B).
-then(F, Monad) when ?isF0(F) -> do(Monad, [F]).
+-spec liftA2(applicative(fn(A, B)), applicative(A)) -> applicative(B).
+liftA2(A1, A2) when is_list(A1), is_list(A2) -> do_list:liftA2(A1, A2);
+liftA2(error = A1, _ = A2)                   -> do_maybe:liftA2(A1, A2);
+liftA2(_ = A1, error = A2)                   -> do_maybe:liftA2(A1, A2);
+liftA2(A1, A2)                               -> do_either:liftA2(A1, A2).
 
 -spec pure(A) -> monad(A) | A.
 pure(A) ->
@@ -48,27 +51,14 @@ pure(A) ->
     _Trace                                          -> A
   end.
 
--spec register_monad(atom()) -> either(duplicate_monad, ok).
-register_monad(Mod) when is_atom(Mod) ->
-  Monads = get_monads(),
-  case lists:member(Mod, Monads) of
-    true  -> {error, duplicate_monad};
-    false -> {ok, put_monads(Monads ++ [Mod])}
-  end.
+-spec do(monad(A), [fn(A, monad(B)) | fn(monad(B))]) -> monad(B).
+do(Monad, Funs) -> do_monad:do(Monad, Funs, ?MONADS).
 
--spec get_monads() -> [atom()].
-get_monads() ->
-  case persistent_term:get(?KEY, undefined) of
-    undefined ->
-      ok = put_monads(?MONADS),
-      ?MONADS;
-    Monads    ->
-      Monads
-  end.
+-spec bind(fn(A, monad(B)), monad(A)) -> monad(B).
+bind(F, Monad) when ?isF1(F) -> do(Monad, [F]).
 
-%%%_* internal ----------------------------------------------------------------
-put_monads(Monads) ->
-  ok = persistent_term:put(?KEY, Monads).
+-spec then(fn(monad(B)), monad(_)) -> monad(B).
+then(F, Monad) when ?isF0(F) -> do(Monad, [F]).
 
 %%%_* Tests ===================================================================
 -ifdef(TEST).
@@ -133,12 +123,9 @@ liftA2_macro_test() ->
   F = fun(A) -> A + 1 end,
   ?assertEqual({ok, 3},    ?liftA2({ok, F}, {ok, 2})),
   ?assertEqual({error, 3}, ?liftA2({ok, F}, {error, 3})),
-  ?assertEqual({error, 1}, ?liftA2({error, 1}, {ok, 3})).
-
-register_monad_test() ->
-  ?assertNot(lists:member(test, get_monads())),
-  ?assertMatch({ok, _}, register_monad(test)),
-  ?assert(lists:member(test, get_monads())),
-  ?assertMatch({error, _}, register_monad(test)).
+  ?assertEqual({error, 1}, ?liftA2({error, 1}, {ok, 3})),
+  ?assertEqual(error,      ?liftA2(error, {ok, 1})),
+  ?assertEqual(error,      ?liftA2({ok, F}, error)),
+  ?assertEqual([2, 3],     ?liftA2([F], [1, 2])).
 
 -endif.
