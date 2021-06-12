@@ -29,6 +29,10 @@
 <p><tt>fn(A) = fun(() -&gt; A)</tt></p>
 
 
+<h3 class="typedecl"><a name="type-map">map()</a></h3>
+<p><tt>map(A) = #{term() := A}</tt></p>
+
+
 <h3 class="typedecl"><a name="type-maybe">maybe()</a></h3>
 <p><tt>maybe(A) = {ok, A} | error</tt></p>
 
@@ -38,7 +42,7 @@
 
 
 <h3 class="typedecl"><a name="type-traversable">traversable()</a></h3>
-<p><tt>traversable(A) = [A] | #{term() := A}</tt></p>
+<p><tt>traversable(A) = [A] | <a href="#type-map">map</a>(A)</tt></p>
 
 
 <h2><a name="index">Function Index</a></h2>
@@ -87,7 +91,7 @@
 
 <h3 class="function"><a name="liftm-2">liftm/2</a></h3>
 <div class="spec">
-<p><tt>liftm(F::function(), Lists::[[term()]] | [<a href="#type-fn">fn</a>([term()])]) -&gt; [term()]</tt><br></p>
+<p><tt>liftm(F::function(), Lists::[list()] | [<a href="#type-fn">fn</a>(list())]) -&gt; list()</tt><br></p>
 <p> </p>
 </div>
 
