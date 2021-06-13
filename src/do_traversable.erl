@@ -8,7 +8,7 @@
 
 %%%_* Exports =================================================================
 -define(API, [ sequence/2,
-               sequence_lazy/2,
+               sequencez/2,
                traverse/2]).
 -export(?API).
 -ignore_xref(?API).
@@ -29,9 +29,9 @@
 sequence(Traversable, Mod) ->
   sequence(Traversable, Mod, ?DEFAULT).
 
--spec sequence_lazy(traversable(fn(applicative(A))), atom()) ->
+-spec sequencez(traversable(fn(applicative(A))), atom()) ->
   applicative(traversable(A)).
-sequence_lazy(Traversable, Mod) ->
+sequencez(Traversable, Mod) ->
   sequence(Traversable, Mod, ?LAZY).
 
 -spec traverse(fn(A, applicative(B)), traversable(A)) ->
