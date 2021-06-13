@@ -73,13 +73,13 @@ lift(F) -> do_monad:lift(F, ?MODULE).
 -spec liftm(fun(), [maybe(A)]) -> maybe(A).
 liftm(F, Maybes) -> do_monad:liftm(F, Maybes, ?MODULE).
 
--spec liftmz(fun(), [fn(maybe(A))]) -> maybe(A).
-liftmz(F, Maybes) -> do_monad:liftmz(F, Maybes, ?MODULE).
-
 -spec then(maybe(_), fn(maybe(A))) -> maybe(A).
 then(Maybe, F) -> do_monad:then(Maybe, F, ?MODULE).
 
 %%%_* maybe -------------------------------------------------------------------
+-spec liftmz(fun(), [fn(maybe(A))]) -> maybe(A).
+liftmz(F, Maybes) -> do_monad:liftmz(F, Maybes, ?MODULE).
+
 -spec maybe(B, fn(A, B), Maybe :: maybe(A)) -> B.
 maybe(B, F, nothing)   when ?isF1(F) -> B;
 maybe(_, F, {just, A}) when ?isF1(F) -> F(A).
