@@ -45,12 +45,12 @@
 
 %%%_* Code ====================================================================
 %%%_* functor -----------------------------------------------------------------
--spec fmap(fn(A, B), maybe(A)) -> maybe(B).
+-spec fmap(fn(A, B), Maybe :: maybe(A)) -> maybe(B).
 fmap(F, {just, A}) when ?isF1(F) -> {just, F(A)};
 fmap(F, nothing)   when ?isF1(F) -> nothing.
 
 %%%_* applicative -------------------------------------------------------------
--spec liftA2(maybe(fn(A, B)), maybe(A)) -> maybe(B).
+-spec liftA2(Maybe :: maybe(fn(A, B)), Maybe :: maybe(A)) -> maybe(B).
 liftA2({just, F}, Maybe) when ?isF1(F) -> fmap(F, Maybe);
 liftA2(nothing, _)                     -> nothing.
 
@@ -80,21 +80,21 @@ liftmz(F, Maybes) -> do_monad:liftmz(F, Maybes, ?MODULE).
 then(Maybe, F) -> do_monad:then(Maybe, F, ?MODULE).
 
 %%%_* maybe -------------------------------------------------------------------
--spec maybe(B, fn(A, B), maybe(A)) -> B.
+-spec maybe(B, fn(A, B), Maybe :: maybe(A)) -> B.
 maybe(B, F, nothing)   when ?isF1(F) -> B;
 maybe(_, F, {just, A}) when ?isF1(F) -> F(A).
 
--spec is_just(maybe(_)) -> boolean().
+-spec is_just(Maybe :: maybe(_)) -> boolean().
 is_just({just, _}) -> true;
 is_just(nothing)   -> false.
 
 -spec is_nothing(maybe(_)) -> boolean().
 is_nothing(A) -> not is_just(A).
 
--spec from_just(maybe(A)) -> A.
+-spec from_just(Maybe :: maybe(A)) -> A.
 from_just({just, A}) -> A.
 
--spec from_maybe(A, maybe(A)) -> A.
+-spec from_maybe(A, Maybe :: maybe(A)) -> A.
 from_maybe(A, nothing)   -> A;
 from_maybe(_, {just, V}) -> V.
 
@@ -102,7 +102,7 @@ from_maybe(_, {just, V}) -> V.
 list_to_maybe([A | _]) -> pure(A);
 list_to_maybe([])      -> nothing.
 
--spec maybe_to_list(maybe(A)) -> [A].
+-spec maybe_to_list(Maybe :: maybe(A)) -> [A].
 maybe_to_list({just, A}) -> [A];
 maybe_to_list(nothing)   -> [].
 
