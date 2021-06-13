@@ -48,11 +48,19 @@
 <h2><a name="index">Function Index</a></h2>
 <table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#bind-2">bind/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#do-2">do/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#either-3">either/3</a></td><td></td></tr>
+<tr><td valign="top"><a href="#errors-1">errors/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#fmap-2">fmap/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#from_error-2">from_error/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#from_ok-2">from_ok/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#is_error-1">is_error/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#is_ok-1">is_ok/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#lift-1">lift/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#liftA2-2">liftA2/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#liftm-2">liftm/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#liftmz-2">liftmz/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#oks-1">oks/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#partition-1">partition/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#pure-1">pure/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#sequence-1">sequence/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#then-2">then/2</a></td><td></td></tr>
@@ -72,9 +80,45 @@
 <p> </p>
 </div>
 
+<h3 class="function"><a name="either-3">either/3</a></h3>
+<div class="spec">
+<p><tt>either(F1::<a href="#type-fn">fn</a>(A, C), F2::<a href="#type-fn">fn</a>(B, C), Either::<a href="#type-either">either</a>(A, B)) -&gt; C</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="errors-1">errors/1</a></h3>
+<div class="spec">
+<p><tt>errors(Eithers::[<a href="#type-either">either</a>(A, term())]) -&gt; [A]</tt><br></p>
+<p> </p>
+</div>
+
 <h3 class="function"><a name="fmap-2">fmap/2</a></h3>
 <div class="spec">
-<p><tt>fmap(F::<a href="#type-fn">fn</a>(B, C), X2::<a href="#type-either">either</a>(A, B)) -&gt; <a href="#type-either">either</a>(A, C)</tt><br></p>
+<p><tt>fmap(F::<a href="#type-fn">fn</a>(B, C), Either::<a href="#type-either">either</a>(A, B)) -&gt; <a href="#type-either">either</a>(A, C)</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="from_error-2">from_error/2</a></h3>
+<div class="spec">
+<p><tt>from_error(A, Either::<a href="#type-either">either</a>(A, term())) -&gt; A</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="from_ok-2">from_ok/2</a></h3>
+<div class="spec">
+<p><tt>from_ok(B, Either::<a href="#type-either">either</a>(term(), B)) -&gt; B</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="is_error-1">is_error/1</a></h3>
+<div class="spec">
+<p><tt>is_error(Either::<a href="#type-either">either</a>(term(), term())) -&gt; boolean()</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="is_ok-1">is_ok/1</a></h3>
+<div class="spec">
+<p><tt>is_ok(Either::<a href="#type-either">either</a>(term(), term())) -&gt; boolean()</tt><br></p>
 <p> </p>
 </div>
 
@@ -86,7 +130,7 @@
 
 <h3 class="function"><a name="liftA2-2">liftA2/2</a></h3>
 <div class="spec">
-<p><tt>liftA2(X1::<a href="#type-either">either</a>(A1, <a href="#type-fn">fn</a>(B, C)), Either::<a href="#type-either">either</a>(A2, B)) -&gt; <a href="#type-either">either</a>(A1 | A2, C)</tt><br></p>
+<p><tt>liftA2(Either::<a href="#type-either">either</a>(A1, <a href="#type-fn">fn</a>(B, C)), Either::<a href="#type-either">either</a>(A2, B)) -&gt; <a href="#type-either">either</a>(A1 | A2, C)</tt><br></p>
 <p> </p>
 </div>
 
@@ -99,6 +143,18 @@
 <h3 class="function"><a name="liftmz-2">liftmz/2</a></h3>
 <div class="spec">
 <p><tt>liftmz(F::function(), Eithers::[<a href="#type-fn">fn</a>(<a href="#type-either">either</a>(term(), B))]) -&gt; <a href="#type-either">either</a>(term(), B)</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="oks-1">oks/1</a></h3>
+<div class="spec">
+<p><tt>oks(Eithers::[<a href="#type-either">either</a>(term(), B)]) -&gt; [B]</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="partition-1">partition/1</a></h3>
+<div class="spec">
+<p><tt>partition(Eithers::[<a href="#type-either">either</a>(A, B)]) -&gt; {[A], [B]}</tt><br></p>
 <p> </p>
 </div>
 

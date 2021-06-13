@@ -11,16 +11,29 @@
 -behaviour(do_monad).
 
 %%%_* Exports =================================================================
--define(API, [ bind/2,
-               do/2,
+-define(API, [ % functor
                fmap/2,
-               lift/1,
+               % applicative
                liftA2/2,
-               liftm/2,
-               liftmz/2,
                pure/1,
                sequence/1,
-               then/2]).
+               % monad
+               bind/2,
+               do/2,
+               lift/1,
+               liftm/2,
+               then/2,
+               % either
+               liftmz/2,
+               either/3,
+               errors/1,
+               oks/1,
+               is_error/1,
+               is_ok/1,
+               from_error/2,
+               from_ok/2,
+               partition/1]).
+
 -export(?API).
 -ignore_xref(?API).
 
@@ -31,12 +44,12 @@
 
 %%%_* Code ====================================================================
 %%%_* functor -----------------------------------------------------------------
--spec fmap(fn(B, C), either(A, B)) -> either(A, C).
+-spec fmap(fn(B, C), Either :: either(A, B)) -> either(A, C).
 fmap(F, {error, A}) when ?isF1(F) -> {error, A};
 fmap(F, {ok, B})    when ?isF1(F) -> {ok, F(B)}. 
 
 %%%_* applicative -------------------------------------------------------------
--spec liftA2(either(A1, fn(B, C)), either(A2, B)) -> either(A1 | A2, C).
+-spec liftA2(Either :: either(A1, fn(B, C)), either(A2, B)) -> either(A1 | A2, C).
 liftA2({ok, F}, Either) when ?isF1(F) -> fmap(F, Either);
 liftA2({error, Reason}, _)            -> {error, Reason}.
 
@@ -59,11 +72,48 @@ lift(F) -> do_monad:lift(F, ?MODULE).
 -spec liftm(fun(), [either(_, B)]) -> either(_, B).
 liftm(F, Eithers) -> do_monad:liftm(F, Eithers, ?MODULE).
 
+-spec then(either(A, _), fn(either(B, C))) -> either(A | B, C).
+then(Either, F) -> do_monad:then(Either, F, ?MODULE).
+
+%%%_* either ------------------------------------------------------------------
 -spec liftmz(fun(), [fn(either(_, B))]) -> either(_, B).
 liftmz(F, Eithers) -> do_monad:liftmz(F, Eithers, ?MODULE).
 
--spec then(either(A, _), fn(either(B, C))) -> either(A | B, C).
-then(Either, F) -> do_monad:then(Either, F, ?MODULE).
+-spec either(fn(A, C), fn(B, C), Either :: either(A, B)) -> C.
+either(F1, F2, {error, A}) when ?isF1(F1), ?isF1(F2) -> F1(A);
+either(F1, F2, {ok, B})    when ?isF1(F1), ?isF1(F2) -> F2(B).
+
+-spec errors([either(A, _)]) -> [A].
+errors(Eithers) when is_list(Eithers) ->
+  lists:filtermap(fun({error, A}) -> {true, A};
+                     ({ok, _B})   -> false end, Eithers).
+
+-spec oks([either(_, B)]) -> [B].
+oks(Eithers) when is_list(Eithers) ->
+  lists:filtermap(fun({ok, B})     -> {true, B};
+                     ({error, _A}) -> false end, Eithers).
+
+
+-spec is_error(Either :: either(_, _)) -> boolean().
+is_error({error, _}) -> true;
+is_error({ok, _})    -> false.
+
+-spec is_ok(either(_, _)) -> boolean().
+is_ok(Either) -> not is_error(Either).
+
+-spec from_error(A, Either :: either(A, _)) -> A.
+from_error(_A, {error, A}) -> A;
+from_error(A, {ok, _B})    -> A.
+
+-spec from_ok(B, Either :: either(_, B)) -> B.
+from_ok(_B, {ok, B})    -> B;
+from_ok(B, {error, _A}) -> B.
+
+-spec partition([either(A, B)]) -> {[A], [B]}.
+partition(Eithers) when is_list(Eithers) ->
+  lists:foldr(fun({error, A}, {As, Bs}) -> {[A | As], Bs};
+                 ({ok, B},    {As, Bs}) -> {As, [B | Bs]} end,
+              {[], []}, Eithers).
 
 %%%_* internal ----------------------------------------------------------------
 flat({ok, {error, A}}) -> {error, A};
@@ -119,5 +169,39 @@ sequence_test() ->
   ?assertEqual({error, reason},         sequence([{ok, 1}, {error, reason}, {ok, 3}])),
   ?assertEqual({ok, #{a => 1, b => 2}}, sequence(#{a => {ok, 1}, b => {ok, 2}})),
   ?assertEqual({error, reason},         sequence(#{a => {ok, 1}, b => {error, reason}})).
+
+either_test() ->
+  F1 = fun(X) -> X end,
+  F2 = fun(_) -> 0 end,
+  ?assertEqual(1, either(F2, F1, {ok, 1})),
+  ?assertEqual(2, either(F1, F2, {error, 2})).
+
+errors_test() ->
+  ?assertEqual([],     errors([])),
+  ?assertEqual([1, 2], errors([{ok, 3}, {error, 1}, {error, 2}, {ok, 4}])).
+
+oks_test() ->
+  ?assertEqual([],     oks([])),
+  ?assertEqual([3, 4], oks([{ok, 3}, {error, 1}, {error, 2}, {ok, 4}])).
+
+is_error_test() ->
+  ?assertEqual(true,  is_error({error, 1})),
+  ?assertEqual(false, is_error({ok, 1})).
+
+is_ok_test() ->
+  ?assertEqual(false, is_ok({error, 1})),
+  ?assertEqual(true,  is_ok({ok, 1})).
+
+from_error_test() ->
+  ?assertEqual(1, from_error(2, {error, 1})),
+  ?assertEqual(2, from_error(2, {ok, 1})).
+
+from_ok_test() ->
+  ?assertEqual(1, from_ok(2, {ok, 1})),
+  ?assertEqual(2, from_ok(2, {error, 1})).
+
+partition_test() ->
+  ?assertEqual({[], []},         partition([])),
+  ?assertEqual({[1, 2], [3, 4]}, partition([{ok, 3}, {error, 1}, {error, 2}, {ok, 4}])).
 
 -endif.
