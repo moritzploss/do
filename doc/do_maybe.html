@@ -89,25 +89,25 @@
 
 <h3 class="function"><a name="fmap-2">fmap/2</a></h3>
 <div class="spec">
-<p><tt>fmap(F::<a href="#type-fn">fn</a>(A, B), X2::<a href="#type-maybe">maybe</a>(A)) -&gt; <a href="#type-maybe">maybe</a>(B)</tt><br></p>
+<p><tt>fmap(F::<a href="#type-fn">fn</a>(A, B), Maybe::<a href="#type-maybe">maybe</a>(A)) -&gt; <a href="#type-maybe">maybe</a>(B)</tt><br></p>
 <p> </p>
 </div>
 
 <h3 class="function"><a name="from_just-1">from_just/1</a></h3>
 <div class="spec">
-<p><tt>from_just(X1::<a href="#type-maybe">maybe</a>(A)) -&gt; A</tt><br></p>
+<p><tt>from_just(Maybe::<a href="#type-maybe">maybe</a>(A)) -&gt; A</tt><br></p>
 <p> </p>
 </div>
 
 <h3 class="function"><a name="from_maybe-2">from_maybe/2</a></h3>
 <div class="spec">
-<p><tt>from_maybe(A, X2::<a href="#type-maybe">maybe</a>(A)) -&gt; A</tt><br></p>
+<p><tt>from_maybe(A, Maybe::<a href="#type-maybe">maybe</a>(A)) -&gt; A</tt><br></p>
 <p> </p>
 </div>
 
 <h3 class="function"><a name="is_just-1">is_just/1</a></h3>
 <div class="spec">
-<p><tt>is_just(X1::<a href="#type-maybe">maybe</a>(term())) -&gt; boolean()</tt><br></p>
+<p><tt>is_just(Maybe::<a href="#type-maybe">maybe</a>(term())) -&gt; boolean()</tt><br></p>
 <p> </p>
 </div>
 
@@ -125,7 +125,7 @@
 
 <h3 class="function"><a name="liftA2-2">liftA2/2</a></h3>
 <div class="spec">
-<p><tt>liftA2(X1::<a href="#type-maybe">maybe</a>(<a href="#type-fn">fn</a>(A, B)), Maybe::<a href="#type-maybe">maybe</a>(A)) -&gt; <a href="#type-maybe">maybe</a>(B)</tt><br></p>
+<p><tt>liftA2(Maybe::<a href="#type-maybe">maybe</a>(<a href="#type-fn">fn</a>(A, B)), Maybe::<a href="#type-maybe">maybe</a>(A)) -&gt; <a href="#type-maybe">maybe</a>(B)</tt><br></p>
 <p> </p>
 </div>
 
@@ -155,13 +155,13 @@
 
 <h3 class="function"><a name="maybe-3">maybe/3</a></h3>
 <div class="spec">
-<p><tt>maybe(B, F::<a href="#type-fn">fn</a>(A, B), X3::<a href="#type-maybe">maybe</a>(A)) -&gt; B</tt><br></p>
+<p><tt>maybe(B, F::<a href="#type-fn">fn</a>(A, B), Maybe::<a href="#type-maybe">maybe</a>(A)) -&gt; B</tt><br></p>
 <p> </p>
 </div>
 
 <h3 class="function"><a name="maybe_to_list-1">maybe_to_list/1</a></h3>
 <div class="spec">
-<p><tt>maybe_to_list(X1::<a href="#type-maybe">maybe</a>(A)) -&gt; [A]</tt><br></p>
+<p><tt>maybe_to_list(Maybe::<a href="#type-maybe">maybe</a>(A)) -&gt; [A]</tt><br></p>
 <p> </p>
 </div>
 
