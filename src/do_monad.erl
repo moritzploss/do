@@ -30,12 +30,12 @@
 lift(F, Mod) when ?isF1(F) -> fun(Monad) -> Mod:liftm(F, [Monad]) end.
 
 -spec liftm(fun(), [monad(_)], atom()) -> monad(_).
-liftm(F, Monads, Mod) when ?isF(F, length(Monads)) andalso is_atom(Mod) ->
+liftm(F, Monads, Mod) when ?isF(F, length(Monads)) ->
   do_liftm(F, Monads, Mod, fun do_traversable:sequence/2).
 
 -spec liftmz(fun(), [fn(monad(_))], atom()) -> monad(_).
-liftmz(F, Thunks, Mod) when ?isF(F, length(Thunks)) andalso is_atom(Mod) ->
-  do_liftm(F, Thunks, Mod, fun do_traversable:sequence_lazy/2).
+liftmz(F, Thunks, Mod) when ?isF(F, length(Thunks)) ->
+  do_liftm(F, Thunks, Mod, fun do_traversable:sequencez/2).
 
 -spec do(monad(A), list(fn(A, monad(B)) | fn(monad(B))), atom()) -> monad(B).
 do(Monad, [], _Mod)                    -> Monad;

@@ -30,13 +30,13 @@
 %%%_* Code ====================================================================
 %%%_* API ---------------------------------------------------------------------
 -spec fmap(fn(A, B), functor(A)) -> functor(B).
-fmap(F, List)           when ?isF1(F), is_list(List) -> do_list:fmap(F, List);
-fmap(F, Map)            when ?isF1(F), is_map(Map)   -> do_map:fmap(F, Map);
-fmap(F, Fn)             when ?isF1(F), ?isF1(Fn)     -> do_fn:fmap(F, Fn);
-fmap(F, {error, _} = E) when ?isF1(F)                -> do_either:fmap(F, E);
-fmap(F, {ok, _} = E)    when ?isF1(F)                -> do_either:fmap(F, E);
-fmap(F, nothing = M)    when ?isF1(F)                -> do_maybe:fmap(F, M);
-fmap(F, {just, _} = M)  when ?isF1(F)                -> do_maybe:fmap(F, M).
+fmap(F, Functor)        when ?isF1(F), is_list(Functor) -> do_list:fmap(F, Functor);
+fmap(F, Functor)        when ?isF1(F), is_map(Functor)  -> do_map:fmap(F, Functor);
+fmap(F, Functor)        when ?isF1(F), ?isF1(Functor)   -> do_fn:fmap(F, Functor);
+fmap(F, {error, _} = E) when ?isF1(F)                   -> do_either:fmap(F, E);
+fmap(F, {ok, _} = E)    when ?isF1(F)                   -> do_either:fmap(F, E);
+fmap(F, nothing = M)    when ?isF1(F)                   -> do_maybe:fmap(F, M);
+fmap(F, {just, _} = M)  when ?isF1(F)                   -> do_maybe:fmap(F, M).
 
 -spec liftA2(applicative(fn(A, B)), applicative(A)) -> applicative(B).
 liftA2(A1, A2) when is_list(A1) -> do_list:liftA2(A1, A2);
