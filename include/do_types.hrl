@@ -9,7 +9,7 @@
 
 -type either(A, B)   :: {error, A} | {ok, B}.
 
--type maybe(A)       :: {ok, A} | error.
+-type maybe(A)       :: {just, A} | nothing.
 
 -type traversable(A) :: [A] | map(A).
 

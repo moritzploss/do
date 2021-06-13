@@ -23,7 +23,8 @@ functors(A) ->
   , fun(_) -> A end
   , {ok, A}
   , {error, reason}
-  , error].
+  , {just, A}
+  , nothing].
   
 preserve_identity_morphism_test() ->
   Id       = fun(Term) -> Term end,

@@ -7,7 +7,7 @@
 -define(pure(A),               do:pure(A)).
 -define(do(Monad, Fs),         do:do(Monad, Fs)).
 -define(bind(Monad, F),        do:bind(Monad, F)).
--define(then(Monad, F),        do:then(Monad, F)).
+-define(then(Monad1, Monad2),  do:then(Monad1, ?f(Monad2))).
 
 -define(sequence(Traversable), do_either:sequence(Traversable)).
 -define(lift(F),               do_either:lift(F)).

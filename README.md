@@ -11,7 +11,7 @@ implementations for commonly used class instances.
 To install the latest version of `do` from [`hex`](https://hex.pm/packages/do),
 add `do` to the `deps` in your rebar config file:
 
-    {do, "1.5.0"}
+    {do, "1.6.0"}
 
 ### What's in the box
 

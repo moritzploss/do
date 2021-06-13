@@ -41,7 +41,7 @@
 
 
 <h3 class="typedecl"><a name="type-maybe">maybe()</a></h3>
-<p><tt>maybe(A) = {ok, A} | error</tt></p>
+<p><tt>maybe(A) = {just, A} | nothing</tt></p>
 
 
 <h3 class="typedecl"><a name="type-monad">monad()</a></h3>
@@ -67,7 +67,7 @@
 
 <h3 class="function"><a name="do-2">do/2</a></h3>
 <div class="spec">
-<p><tt>do(Monad::<a href="#type-monad">monad</a>(A), Funs::[<a href="#type-fn">fn</a>(A, <a href="#type-monad">monad</a>(B)) | <a href="#type-fn">fn</a>(<a href="#type-monad">monad</a>(B))]) -&gt; <a href="#type-monad">monad</a>(B)</tt><br></p>
+<p><tt>do(Monad::<a href="#type-monad">monad</a>(A), Fs::[<a href="#type-fn">fn</a>(A, <a href="#type-monad">monad</a>(B)) | <a href="#type-fn">fn</a>(<a href="#type-monad">monad</a>(B))]) -&gt; <a href="#type-monad">monad</a>(B)</tt><br></p>
 <p> </p>
 </div>
 
