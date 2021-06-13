@@ -7,7 +7,7 @@
 -module(do_functor).
 
 %%%_* Includes ================================================================
--include("do_macros.hrl").
+-include("do_guards.hrl").
 -include("do_types.hrl").
 
 %%%_* Callbacks ===============================================================

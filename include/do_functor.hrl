@@ -1,0 +1,1 @@
+-define(fmap(F, Functor), do:fmap(F, Functor)).
