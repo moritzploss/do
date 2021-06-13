@@ -11,16 +11,30 @@
 -behaviour(do_monad).
 
 %%%_* Exports =================================================================
--define(API, [ bind/2,
-               do/2,
+-define(API, [ % functor
                fmap/2,
-               lift/1,
+               % applicative
                liftA2/2,
-               liftm/2,
-               liftmz/2,
                pure/1,
                sequence/1,
-               then/2]).
+               % monad
+               bind/2,
+               do/2,
+               lift/1,
+               liftm/2,
+               then/2,
+               % maybe
+               cat_maybes/1,
+               from_just/1,
+               from_maybe/2,
+               is_just/1,
+               is_nothing/1,
+               list_to_maybe/1,
+               liftmz/2,
+               map_maybes/2,
+               maybe/3,
+               maybe_to_list/1]).
+
 -export(?API).
 -ignore_xref(?API).
 
@@ -64,6 +78,42 @@ liftmz(F, Maybes) -> do_monad:liftmz(F, Maybes, ?MODULE).
 
 -spec then(maybe(_), fn(maybe(A))) -> maybe(A).
 then(Maybe, F) -> do_monad:then(Maybe, F, ?MODULE).
+
+%%%_* maybe -------------------------------------------------------------------
+-spec maybe(B, fn(A, B), maybe(A)) -> B.
+maybe(B, F, nothing)   when ?isF1(F) -> B;
+maybe(_, F, {just, A}) when ?isF1(F) -> F(A).
+
+-spec is_just(maybe(_)) -> boolean().
+is_just({just, _}) -> true;
+is_just(nothing)   -> false.
+
+-spec is_nothing(maybe(_)) -> boolean().
+is_nothing(A) -> not is_just(A).
+
+-spec from_just(maybe(A)) -> A.
+from_just({just, A}) -> A.
+
+-spec from_maybe(A, maybe(A)) -> A.
+from_maybe(A, nothing)   -> A;
+from_maybe(_, {just, V}) -> V.
+
+-spec list_to_maybe([A]) -> maybe(A).
+list_to_maybe([A | _]) -> pure(A);
+list_to_maybe([])      -> nothing.
+
+-spec maybe_to_list(maybe(A)) -> [A].
+maybe_to_list({just, A}) -> [A];
+maybe_to_list(nothing)   -> [].
+
+-spec cat_maybes([maybe(A)]) -> [A].
+cat_maybes(Maybes) when is_list(Maybes) ->
+  lists:flatmap(fun({just, A}) -> [A];
+                   (nothing)   -> [] end, Maybes).
+
+-spec map_maybes(fn(A, maybe(B)), [A]) -> [B].
+map_maybes(F, List) when ?isF1(F), is_list(List) ->
+  cat_maybes(do_list:fmap(F, List)).
 
 %%%_* internal ----------------------------------------------------------------
 flat({just, nothing})   -> nothing;
@@ -123,5 +173,47 @@ do_test() ->
   ?assertEqual({just, 4},  do({just, 3}, [Fun])),
   ?assertEqual({just, 6},  do({just, 3}, [Fun0, Fun])),
   ?assertEqual(nothing,    do(nothing,   [Fun])).
+
+maybe_test() ->
+  F = fun(A) -> A + 1 end,
+  ?assertEqual(1, maybe(1, F, nothing)),
+  ?assertEqual(2, maybe(1, F, {just, 1})).
+
+is_just_test() ->
+  ?assertEqual(false, is_just(nothing)),
+  ?assertEqual(true,  is_just({just, 1})).
+
+is_nothing_test() ->
+  ?assertEqual(true,  is_nothing(nothing)),
+  ?assertEqual(false, is_nothing({just, 1})).
+
+from_just_test() ->
+  ?assertEqual(1,               from_just({just, 1})),
+  ?assertError(function_clause, from_just(nothing)).
+
+from_maybe_test() ->
+  ?assertEqual(2, from_maybe(1, {just, 2})),
+  ?assertEqual(1, from_maybe(1, nothing)).
+
+list_to_maybe_test() ->
+  ?assertEqual({just, 1}, list_to_maybe([1])),
+  ?assertEqual({just, 1}, list_to_maybe([1, 2])),
+  ?assertEqual(nothing,   list_to_maybe([])).
+
+maybe_to_list_test() ->
+  ?assertEqual([1], maybe_to_list({just, 1})),
+  ?assertEqual([],  maybe_to_list(nothing)).
+
+cat_maybes_test() ->
+  ?assertEqual([1],    cat_maybes([{just, 1}])),
+  ?assertEqual([],     cat_maybes([nothing])),
+  ?assertEqual([],     cat_maybes([])),
+  ?assertEqual([1, 2], cat_maybes([{just, 1}, nothing, {just, 2}])).
+
+map_maybes_test() ->
+  F = fun(N) when N < 5 -> {just, N};
+         (_)            -> nothing end,
+  ?assertEqual([],           map_maybes(F, [])),
+  ?assertEqual([1, 2, 3, 4], map_maybes(F, [1, 2, 3, 4, 5, 6, 7])).
 
 -endif.
