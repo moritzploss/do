@@ -22,10 +22,9 @@
 -include("do.hrl").
 
 %%%_* Macros ==================================================================
--define(MONADS, [do_either, do_list, do_maybe]).
--define(TRACE,  element(2, process_info(self(), current_stacktrace))).
--define(FMAP,   {_, _, 2, _}).
--define(DO,     {do_monad, do, 3, _}).
+-define(TRACE, element(2, process_info(self(), current_stacktrace))).
+-define(FMAP,  {_, _, 2, _}).
+-define(DO,    {do_monad, do, 3, _}).
 
 %%%_* Code ====================================================================
 %%%_* API ---------------------------------------------------------------------
