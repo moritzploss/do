@@ -81,8 +81,8 @@ then_example() ->
 The `?do` macro consecutively binds (`>>=` or `>>`) monads and functions. The
 macro takes a start value (a monad), and a list of functions. The functions
 must each take either 0 or 1 argument(s) and must return a monad. On execution,
-the start value is passed to the first function in the provided list, and is
-then piped through consecutive functions using `bind`. For example (with
+the start value is passed to the first function, and is then piped through
+consecutive functions using `bind` or `then`. For example (with
 [`maybe`](./src/do_maybe.erl) monad):
 
 ```erlang
@@ -91,7 +91,7 @@ then piped through consecutive functions using `bind`. For example (with
 maybe_add1(N) when N > 2 -> nothing;
 maybe_add1(N)            -> {just, N + 1}.
 
-do_either() ->
+do_example() ->
   nothing = ?do({just, 1}, [ fun maybe_add1/1,
                              fun maybe_add1/1,
                              fun maybe_add1/1,
