@@ -3,15 +3,15 @@
 ## do
 
 This package brings monads, applicatives, functors, and `do`-notation to
-Erlang. It provides behaviours for related type classes, as well as
-implementations for commonly used class instances.
+Erlang. Inspired by Haskell's type system, it provides behaviours for related
+type classes, as well as implementations for commonly used class instances.
 
 ### Installation
 
 To install the latest version of `do` from [`hex`](https://hex.pm/packages/do),
 add `do` to the `deps` in your rebar config file:
 
-    {do, "1.9.0"}
+    {do, "1.9.1"}
 
 ### What's in the box
 
@@ -35,23 +35,59 @@ fmap_example() ->
   #{a => 2}    = ?fmap(fun add1/1, #{a => 1}).
 ```
 
-### The do macro
+### The bind macro
 
-The `?do` macro consecutively executes functions inside monads. The macro
-takes a start value (a monad), and a list of functions. The functions must
-each take either 0 or 1 argument(s) and must return a monad. On execution,
-the start value is passed to the first function in the provided list, and is
-then piped through consecutive functions using `bind`.
+The `?bind` macro can be used to bind (`>>=`) a function that returns
+a monad to a monad of the same type. For example (with `either` monad):
 
 ```erlang
 -include_lib("do/include/do.hrl").
 
-maybe_add1(N) when N > 2 -> {error, N};
-maybe_add1(N)            -> {ok, N + 1}.
+maybe_add1(1) -> {ok, 2};
+maybe_add1(_) -> {error, not_1}.
+
+bind_example() ->
+  {ok, 2}        = ?bind({ok, 1}, fun maybe_add1/1),
+  {error, not_1} = ?bind({ok, 2}, fun maybe_add1/1).
+```
+
+### The then macro
+
+The `?then` macro can be used to chain (`>>`) monadic expressions of the same
+type. The second argument to `?then` is automatically wrapped in a thunk that
+will only be executed if the first argument indicates success. For example
+(with `list` monad):
+
+```erlang
+-include_lib("do/include/do.hrl").
+
+maybe_add1(1) -> [2];
+maybe_add1(_) -> [].
+
+then_example() ->
+  []  = ?then([],  maybe_add1(1)),
+  []  = ?then([5], maybe_add1(2)),
+  [2] = ?then([5], maybe_add1(1)).
+```
+
+### The do macro
+
+The `?do` macro consecutively binds (`>>=`) monads and functions. The macro
+takes a start value (a monad), and a list of functions. The functions must
+each take either 0 or 1 argument(s) and must return a monad. On execution,
+the start value is passed to the first function in the provided list, and is
+then piped through consecutive functions using `bind`. For example (with
+`maybe` monad):
+
+```erlang
+-include_lib("do/include/do.hrl").
+
+maybe_add1(N) when N > 2 -> nothing;
+maybe_add1(N)            -> {just, N + 1}.
 
 do_either() ->
-  {error, 3} = ?do({ok, 1}, [ fun maybe_add1/1,
-                              fun maybe_add1/1,
-                              fun maybe_add1/1,
-                              fun maybe_add1/1]).
+  nothing = ?do({just, 1}, [ fun maybe_add1/1,
+                             fun maybe_add1/1,
+                             fun maybe_add1/1,
+                             fun maybe_add1/1]).
 ```
