@@ -7,6 +7,7 @@
 -module(do_monad).
 
 %%%_* Exports =================================================================
+-export([do/2]).
 -export([lift/2]).
 -export([liftm/3]).
 -export([liftmz/3]).
@@ -36,6 +37,13 @@ liftm(F, Monads, Mod) when ?isF(F, length(Monads)) ->
 -spec liftmz(fun(), [fn(monad(_))], atom()) -> monad(_).
 liftmz(F, Thunks, Mod) when ?isF(F, length(Thunks)) ->
   do_liftm(F, Thunks, Mod, fun do_traversable:sequencez/2).
+
+-spec do(monad(A), [fn(A, monad(B)) | fn(monad(B))]) -> monad(B).
+do(Monad, Fs) when is_list(Monad) -> do_list:do(Monad, Fs);
+do({ok, _} = Monad, Fs)           -> do_either:do(Monad, Fs);
+do({error, _} = Monad, Fs)        -> do_either:do(Monad, Fs);
+do({just, _} = Monad, Fs)         -> do_maybe:do(Monad, Fs);
+do(nothing = Monad, Fs)           -> do_maybe:do(Monad, Fs).
 
 -spec do(monad(A), list(fn(A, monad(B)) | fn(monad(B))), atom()) -> monad(B).
 do(Monad, [], _Mod)                    -> Monad;

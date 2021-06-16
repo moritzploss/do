@@ -1,13 +1,13 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% @doc The Applicative Type Class.
+%%% @doc The Semigroup Type Class.
 %%% @end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%_* Module declaration ======================================================
--module(do_applicative).
+-module(do_semigroup).
 
 %%%_* Exports =================================================================
--define(API, [liftA2/2]).
+-define(API, [append/2]).
 -export(?API).
 -ignore_xref(?API).
 
@@ -15,14 +15,11 @@
 -include("do_types.hrl").
 
 %%%_* Callbacks ===============================================================
--callback pure(A) -> applicative(A).
--callback liftA2(applicative(fn(A, B)), applicative(A)) -> applicative(B).
+-callback append(semigroup(A), semigroup(A)) -> semigroup(A).
 
 %%%_* Code ====================================================================
 %%%_* API ---------------------------------------------------------------------
--spec liftA2(applicative(fn(A, B)), applicative(A)) -> applicative(B).
-liftA2(A1, A2) when is_list(A1) -> do_list:liftA2(A1, A2);
-liftA2({ok, _} = A1, A2)        -> do_either:liftA2(A1, A2);
-liftA2({error, _} = A1, A2)     -> do_either:liftA2(A1, A2);
-liftA2({just, _} = A1, A2)      -> do_maybe:liftA2(A1, A2);
-liftA2(nothing = A1, A2)        -> do_maybe:liftA2(A1, A2).
+append(List1, List2) when is_list(List1), is_list(List2) -> do_list:append(List1, List2);
+append({just, _} = M1, {just, _} = M2)                   -> do_maybe:append(M1, M2);
+append(nothing = M1,   {just, _} = M2)                   -> do_maybe:append(M1, M2);
+append({just, _} = M1, nothing = M2)                     -> do_maybe:append(M1, M2).

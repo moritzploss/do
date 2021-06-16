@@ -6,12 +6,18 @@
 %%%_* Module declaration ======================================================
 -module(do_list).
 
+-behaviour(do_semigroup).
+-behaviour(do_monoid).
+-behaviour(do_foldable).
 -behaviour(do_functor).
 -behaviour(do_applicative).
 -behaviour(do_monad).
 
 %%%_* Exports =================================================================
--define(API, [ bind/2,
+-define(API, [ append/2,
+               mempty/0,
+               foldr/3,
+               bind/2,
                do/2,
                fmap/2,
                lift/1,
@@ -29,6 +35,18 @@
 -include("do.hrl").
 
 %%%_* Code ====================================================================
+%%%_* semigroup ---------------------------------------------------------------
+-spec append([A], [A]) -> [A].
+append(List1, List2) -> List1 ++ List2.
+
+%%%_* monoid ------------------------------------------------------------------
+-spec mempty() -> list().
+mempty() -> [].
+
+%%%_* foldable ----------------------------------------------------------------
+-spec foldr(fn(A, B, B), B, [A]) -> B.
+foldr(F, Acc, List) when ?isF2(F), is_list(List) -> lists:foldr(F, Acc, List).
+
 %%%_* functor -----------------------------------------------------------------
 -spec fmap(fn(A, B), [A]) -> [B].
 fmap(F, List) when ?isF1(F) -> lists:map(F, List).

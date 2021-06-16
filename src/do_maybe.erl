@@ -6,12 +6,20 @@
 %%%_* Module declaration ======================================================
 -module(do_maybe).
 
+-behaviour(do_semigroup).
+-behaviour(do_monoid).
+-behaviour(do_foldable).
 -behaviour(do_functor).
 -behaviour(do_applicative).
 -behaviour(do_monad).
 
 %%%_* Exports =================================================================
--define(API, [ % functor
+-define(API, [ % semigroup
+               append/2,
+               mempty/0,
+               % foldable
+               foldr/3,
+               % functor
                fmap/2,
                % applicative
                liftA2/2,
@@ -44,6 +52,21 @@
 -include("do.hrl").
 
 %%%_* Code ====================================================================
+%%%_* semigroup ---------------------------------------------------------------
+-spec append(maybe(A), maybe(A)) -> maybe(A).
+append({just, A1}, {just, A2}) -> {just, do_semigroup:append(A1, A2)};
+append(nothing, {just, _})     -> nothing;
+append({just, _}, nothing)     -> nothing.
+
+%%%_* monoid ------------------------------------------------------------------
+-spec mempty() -> maybe(_).
+mempty() -> nothing.
+
+%%%_* foldable ----------------------------------------------------------------
+-spec foldr(fn(A, B, B), B, maybe(A)) -> B.
+foldr(_, Acc, nothing)   -> Acc;
+foldr(F, Acc, {just, A}) -> F(A, Acc).
+
 %%%_* functor -----------------------------------------------------------------
 -spec fmap(fn(A, B), Maybe :: maybe(A)) -> maybe(B).
 fmap(F, {just, A}) when ?isF1(F) -> {just, F(A)};

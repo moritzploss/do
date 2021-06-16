@@ -12,7 +12,8 @@
                pure/1,
                do/2,
                bind/2,
-               then/2]).
+               then/2,
+               mod/1]).
 -export(?API).
 -ignore_xref(?API).
 
@@ -29,20 +30,10 @@
 %%%_* Code ====================================================================
 %%%_* API ---------------------------------------------------------------------
 -spec fmap(fn(A, B), functor(A)) -> functor(B).
-fmap(F, Functor)        when ?isF1(F), is_list(Functor) -> do_list:fmap(F, Functor);
-fmap(F, Functor)        when ?isF1(F), is_map(Functor)  -> do_map:fmap(F, Functor);
-fmap(F, Functor)        when ?isF1(F), ?isF1(Functor)   -> do_fn:fmap(F, Functor);
-fmap(F, {error, _} = E) when ?isF1(F)                   -> do_either:fmap(F, E);
-fmap(F, {ok, _} = E)    when ?isF1(F)                   -> do_either:fmap(F, E);
-fmap(F, nothing = M)    when ?isF1(F)                   -> do_maybe:fmap(F, M);
-fmap(F, {just, _} = M)  when ?isF1(F)                   -> do_maybe:fmap(F, M).
+fmap(F, Functor) -> do_functor:fmap(F, Functor).
 
 -spec liftA2(applicative(fn(A, B)), applicative(A)) -> applicative(B).
-liftA2(A1, A2) when is_list(A1) -> do_list:liftA2(A1, A2);
-liftA2({ok, _} = A1, A2)        -> do_either:liftA2(A1, A2);
-liftA2({error, _} = A1, A2)     -> do_either:liftA2(A1, A2);
-liftA2({just, _} = A1, A2)      -> do_maybe:liftA2(A1, A2);
-liftA2(nothing = A1, A2)        -> do_maybe:liftA2(A1, A2).
+liftA2(A1, A2) -> do_applicative:liftA2(A1, A2).
 
 -spec pure(A) -> monad(A) | A.
 pure(A) ->
@@ -52,17 +43,21 @@ pure(A) ->
   end.
 
 -spec do(monad(A), [fn(A, monad(B)) | fn(monad(B))]) -> monad(B).
-do(Monad, Fs) when is_list(Monad) -> do_list:do(Monad, Fs);
-do({ok, _} = Monad, Fs)           -> do_either:do(Monad, Fs);
-do({error, _} = Monad, Fs)        -> do_either:do(Monad, Fs);
-do({just, _} = Monad, Fs)         -> do_maybe:do(Monad, Fs);
-do(nothing = Monad, Fs)           -> do_maybe:do(Monad, Fs).
+do(Monad, Fs) -> do_monad:do(Monad, Fs).
 
 -spec bind(monad(A), fn(A, monad(B))) -> monad(B).
 bind(Monad, F) when ?isF1(F) -> do(Monad, [F]).
 
 -spec then(monad(_), fn(monad(B))) -> monad(B).
 then(Monad, F) when ?isF0(F) -> do(Monad, [F]).
+
+mod(Type) when is_list(Type) -> do_list;
+mod(Type) when is_map(Type)  -> do_map;
+mod(Type) when ?isF1(Type)   -> do_fn;
+mod({error, _})              -> do_either;
+mod({ok, _})                 -> do_either;
+mod(nothing)                 -> do_maybe;
+mod({just, _})               -> do_maybe.
 
 %%%_* Tests ===================================================================
 -ifdef(TEST).
