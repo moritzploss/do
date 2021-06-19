@@ -13,14 +13,11 @@
 
 %%%_* Includes ================================================================
 -include("do_types.hrl").
+-include("do_internal.hrl").
 
 %%%_* Callbacks ===============================================================
 -callback append(semigroup(A), semigroup(A)) -> semigroup(A).
 
 %%%_* Code ====================================================================
 %%%_* API ---------------------------------------------------------------------
-append(List1, List2) when is_list(List1) -> do_list:append(List1, List2);
-append(nothing = M1, M2)                 -> do_maybe:append(M1, M2);
-append({just, _} = M1, M2)               -> do_maybe:append(M1, M2);
-append({ok, _} = M1, M2)                 -> do_either:append(M1, M2);
-append({error, _} = M1, M2)              -> do_either:append(M1, M2).
+append(S1, S2) -> ?Mod(S1):append(S1, S2).

@@ -80,16 +80,16 @@ traverse(F, List) when ?isF1(F) -> fmap(F, List).
 bind(List, F) when ?isF1(F) -> flat(fmap(F, List)).
 
 -spec do([A], [fn(A, [B]) | fn([B])]) -> [B].
-do(List, Fs) -> do_monad:do(List, Fs, ?MODULE).
+do(List, Fs) -> do_monad:do(List, Fs).
 
 -spec lift(fn(A, B)) -> fn(monad(A), monad(B)).
 lift(F) -> do_monad:lift(F, ?MODULE).
 
 -spec liftm(fun(), [list()] | [fn(list())]) -> list().
-liftm(F, Lists) -> do_monad:liftm(F, Lists, ?MODULE).
+liftm(F, Lists) -> do_monad:liftm(F, Lists).
 
 -spec then(list(), fn([A])) -> [A].
-then(List, F) -> do_monad:then(List, F, ?MODULE).
+then(List, F) -> do_monad:then(List, F).
 
 %%%_* internal ----------------------------------------------------------------
 flat(List) -> lists:concat(List).
@@ -101,7 +101,8 @@ sequence([Head | Rest], Mode) ->
   case Rest of
     [] -> Mod:liftA2(Applicative, Mod:pure(Rest));
     _  -> Mod:liftA2(Applicative, sequence(Rest, Mode))
-  end.
+  end;
+sequence([], _) -> [].
 
 get_elm(F, ?LAZY)      -> F();
 get_elm(Elm, ?DEFAULT) -> Elm.
@@ -109,6 +110,17 @@ get_elm(Elm, ?DEFAULT) -> Elm.
 %%%_* Tests ===================================================================
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
+
+append_test() ->
+  ?equals(mempty(), append(mempty(), mempty())),
+  ?equals(pure(1),  append(pure(1), mempty())),
+  ?equals([1, 2],   append(pure(1), pure(2))),
+  ?equals(pure(1),  append(mempty(), pure(1))).
+
+foldr_test() ->
+  F = fun(A, B) -> A + B end,
+  ?equals(6, foldr(F, 0, [1, 2, 3])),
+  ?equals(0, foldr(F, 0, [])).
 
 pure_test() ->
   ?assertEqual([1], pure(1)).
@@ -120,32 +132,37 @@ lift_test() ->
 
 liftA2_test() ->
   Applicative = fmap(fun(E1) -> fun(E2) -> E1 + E2 end end, [-1, 0, 1]),
-  ?assertEqual([0, 1, 2, 1, 2, 3, 2, 3, 4], liftA2(Applicative, [1, 2, 3])),
-  ?assertEqual([],                          liftA2(Applicative, [])),
-  ?assertEqual([],                          liftA2([],          [1, 2, 3])).
+  ?equals([0, 1, 2, 1, 2, 3, 2, 3, 4], liftA2(Applicative, [1, 2, 3])),
+  ?equals([],                          liftA2(Applicative, [])),
+  ?equals([],                          liftA2([],          [1, 2, 3])).
+
+traverse_test() ->
+  F = fun(A) -> A + 1 end,
+  ?equals([2, 3, 4], traverse(F, [1, 2, 3])).
 
 sequence_list_test() ->
-  ?assertEqual([],                                               sequence([[]])),
-  ?assertEqual([[1]],                                            sequence([[1]])),
-  ?assertEqual([[1, 2, 3]],                                      sequence([[1], [2], [3]])),
-  ?assertEqual([],                                               sequence([[1, 2], []])),
-  ?assertEqual([],                                               sequence([[], [1, 2]])),
-  ?assertEqual([[1, 3], [1, 4], [1, 5], [2, 3], [2, 4], [2, 5]], sequence([[1, 2], [3, 4, 5]])).
+  ?equals([],                                               sequence([])),
+  ?equals([],                                               sequence([[]])),
+  ?equals([[1]],                                            sequence([[1]])),
+  ?equals([[1, 2, 3]],                                      sequence([[1], [2], [3]])),
+  ?equals([],                                               sequence([[1, 2], []])),
+  ?equals([],                                               sequence([[], [1, 2]])),
+  ?equals([[1, 3], [1, 4], [1, 5], [2, 3], [2, 4], [2, 5]], sequence([[1, 2], [3, 4, 5]])).
 
 sequence_maybe_test() ->
-  ?assertEqual({just, [1, 2, 3]}, sequence([{just, 1}, {just, 2}, {just, 3}])),
-  ?assertEqual(nothing,           sequence([{just, 1}, nothing, {just, 3}])).
+  ?equals({just, [1, 2, 3]}, sequence([{just, 1}, {just, 2}, {just, 3}])),
+  ?equals(nothing,           sequence([{just, 1}, nothing, {just, 3}])).
 
 sequence_either_test() ->
-  ?assertEqual({ok, [1, 2, 3]}, sequence([{ok, 1}, {ok, 2}, {ok, 3}])),
-  ?assertEqual({error, reason}, sequence([{ok, 1}, {error, reason}, {ok, 3}])).
+  ?equals({ok, [1, 2, 3]}, sequence([{ok, 1}, {ok, 2}, {ok, 3}])),
+  ?equals({error, reason}, sequence([{ok, 1}, {error, reason}, {ok, 3}])).
 
 do_test() ->
   Fun0 = fun() -> ?pure(3) end,
   Fun  = fun(A) -> ?pure(A + 1) end,
-  ?assertEqual([3], do([3],  [])),
-  ?assertEqual([4], do([3],  [Fun])),
-  ?assertEqual([4], do([3],  [Fun0, Fun])),
-  ?assertEqual([],  do([],   [Fun])).
+  ?equals([3], do([3],  [])),
+  ?equals([4], do([3],  [Fun])),
+  ?equals([4], do([3],  [Fun0, Fun])),
+  ?equals([],  do([],   [Fun])).
 
 -endif.

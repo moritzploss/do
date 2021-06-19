@@ -21,13 +21,7 @@
 %%%_* Code ====================================================================
 %%%_* API ---------------------------------------------------------------------
 -spec fmap(fn(A, B), functor(A)) -> functor(B).
-fmap(F, Functor)        when ?isF1(F), is_list(Functor) -> do_list:fmap(F, Functor);
-fmap(F, Functor)        when ?isF1(F), is_map(Functor)  -> do_map:fmap(F, Functor);
-fmap(F, Functor)        when ?isF1(F), ?isF1(Functor)   -> do_fn:fmap(F, Functor);
-fmap(F, {error, _} = E) when ?isF1(F)                   -> do_either:fmap(F, E);
-fmap(F, {ok, _} = E)    when ?isF1(F)                   -> do_either:fmap(F, E);
-fmap(F, nothing = M)    when ?isF1(F)                   -> do_maybe:fmap(F, M);
-fmap(F, {just, _} = M)  when ?isF1(F)                   -> do_maybe:fmap(F, M).
+fmap(F, Functor) -> ?Mod(Functor):fmap(F, Functor).
 
 %%%_* Tests ===================================================================
 -ifdef(TEST).

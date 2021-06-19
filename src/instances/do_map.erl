@@ -48,23 +48,30 @@ fmap(F, Map) when ?isF1(F) -> maps:map(fun(_, V) -> F(V) end, Map).
 %% map(applicative) -> applicative(map)
 -spec sequence(map(applicative(A))) -> applicative(map(A)).
 sequence(Map) when is_map(Map) ->
-  {Keys, [Val | _] = Vals} = lists:unzip(maps:to_list(Map)),
-  ?Mod(Val):fmap(fun(Sequenced) ->
-                    maps:from_list(lists:zip(Keys, Sequenced))
-                 end,
-                 do_list:sequence(Vals)).
+  {Keys, Vals} = lists:unzip(maps:to_list(Map)),
+  case Vals of
+    []       -> mempty();
+    [V | _]  -> ?Mod(V):fmap(fun(Seq) -> maps:from_list(lists:zip(Keys, Seq)) end,
+                             do_list:sequence(Vals))
+  end.
 
 %%%_* Tests ===================================================================
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 
-sequence_map_test() ->
+append_test() ->
+  ?equals(mempty(),  append(mempty(), mempty())),
+  ?equals(#{a => 1}, append(#{a => 1}, mempty())),
+  ?equals(#{a => 1}, append(mempty(), #{a => 1})).
+
+fmap_test() ->
   F = fun(A) -> A + 1 end,
-  ?assertEqual(#{a => 2, b => 3}, fmap(F, #{a => 1, b => 2})).
+  ?equals(#{a => 2, b => 3}, fmap(F, #{a => 1, b => 2})).
 
 sequence_test() ->
-  ?assertEqual({ok, #{a => 1, b => 2}}, sequence(#{a => {ok, 1}, b => {ok, 2}})),
-  ?assertEqual(nothing,                 sequence(#{a => nothing, b => {ok, 2}})),
-  ?assertEqual([#{a => 1, b => 2}],     sequence(#{a => [1], b => [2]})).
+  ?equals(#{},                     sequence(#{})),
+  ?equals({ok, #{a => 1, b => 2}}, sequence(#{a => {ok, 1}, b => {ok, 2}})),
+  ?equals(nothing,                 sequence(#{a => nothing, b => {ok, 2}})),
+  ?equals([#{a => 1, b => 2}],     sequence(#{a => [1], b => [2]})).
 
 -endif.

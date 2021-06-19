@@ -7,12 +7,9 @@
 -module(do_monad).
 
 %%%_* Exports =================================================================
--export([do/2]).
--export([lift/2]).
--export([liftm/3]).
--export([liftmz/3]).
--export([do/3]).
--export([then/3]).
+-define(API, [do/2, lift/2, liftm/2, liftmz/2, then/2]).
+-export(?API).
+-ignore_xref(?API).
 
 %%%_* Includes ================================================================
 -include("do_internal.hrl").
@@ -30,29 +27,33 @@
 -spec lift(fn(A, B), atom()) -> fn(monad(A), monad(B)).
 lift(F, Mod) when ?isF1(F) -> fun(Monad) -> Mod:liftm(F, [Monad]) end.
 
--spec liftm(fun(), [monad(_)], atom()) -> monad(_).
-liftm(F, Monads, Mod) when ?isF(F, length(Monads)) ->
-  do_liftm(F, Monads, Mod, fun do_traversable:sequence/1).
+-spec liftm(fun(), [monad(_)]) -> monad(_).
+liftm(F, [M | _] = Monads) when ?isF(F, length(Monads)) ->
+  do_liftm(F, Monads, ?Mod(M), fun do_traversable:sequence/1).
 
--spec liftmz(fun(), [fn(monad(_))], atom()) -> monad(_).
-liftmz(F, Thunks, Mod) when ?isF(F, length(Thunks)) ->
-  do_liftm(F, Thunks, Mod, fun do_list:sequencez/1).
+-spec liftmz(fun(), [fn(monad(_))]) -> monad(_).
+liftmz(F, [T | Ts] = Thunks) when ?isF(F, length(Thunks)) ->
+  V = T(),
+  do_liftm(F, [?thunk(V) | Ts], ?Mod(V), fun do_list:sequencez/1).
 
 -spec do(monad(A), [fn(A, monad(B)) | fn(monad(B))]) -> monad(B).
-do(Monad, Fs) when is_list(Monad) -> do_list:do(Monad, Fs);
-do({ok, _} = Monad, Fs)           -> do_either:do(Monad, Fs);
-do({error, _} = Monad, Fs)        -> do_either:do(Monad, Fs);
-do({just, _} = Monad, Fs)         -> do_maybe:do(Monad, Fs);
-do(nothing = Monad, Fs)           -> do_maybe:do(Monad, Fs).
+do(Monad, [])                     -> Monad;
+do(Monad, [F | Fs]) when ?isF0(F) -> do(?Mod(Monad):then(Monad, F), Fs);
+do(Monad, [F | Fs]) when ?isF1(F) -> do(?Mod(Monad):bind(Monad, F), Fs).
 
--spec do(monad(A), list(fn(A, monad(B)) | fn(monad(B))), atom()) -> monad(B).
-do(Monad, [], _Mod)                    -> Monad;
-do(Monad, [F | Fs], Mod) when ?isF0(F) -> do(Mod:then(Monad, F), Fs, Mod);
-do(Monad, [F | Fs], Mod) when ?isF1(F) -> do(Mod:bind(Monad, F), Fs, Mod).
-
--spec then(monad(_), fn(monad(A)), atom()) -> monad(A).
-then(Monad, F, Mod) when ?isF0(F) -> Mod:bind(Monad, fun(_) -> F() end).
+-spec then(monad(_), fn(monad(A))) -> monad(A).
+then(Monad, F) when ?isF0(F) -> ?Mod(Monad):bind(Monad, fun(_) -> F() end).
 
 %%%_* Internal ----------------------------------------------------------------
 do_liftm(F, Monads, Mod, Sequence) ->
   Mod:fmap(fun(Args) -> apply(F, Args) end, Sequence(Monads)).
+
+%%%_* Tests ===================================================================
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+
+liftmz_test() ->
+  F = fun(A, B) -> A + B end,
+  ?equals({ok, 3}, liftmz(F, [?thunk({ok, 1}), ?thunk({ok, 2})])).
+
+-endif.

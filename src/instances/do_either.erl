@@ -7,6 +7,7 @@
 -module(do_either).
 
 -behaviour(do_semigroup).
+-behaviour(do_monoid).
 -behaviour(do_foldable).
 -behaviour(do_functor).
 -behaviour(do_applicative).
@@ -35,7 +36,6 @@
                liftm/2,
                then/2,
                % either
-               liftmz/2,
                either/3,
                errors/1,
                oks/1,
@@ -86,8 +86,8 @@ pure(B) -> {ok, B}.
 
 %%%_* travsersable ------------------------------------------------------------
 -spec sequence(either(A, applicative(B))) -> applicative(either(A, B)).
-sequence({ok, Applicative} = Either) ->
-  do_traversable:sequence(Either, ?MODULE, ?Mod(Applicative)).
+sequence({ok, B} = Either) -> do_traversable:sequence(Either, ?MODULE, ?Mod(B));
+sequence({error, A})       -> {error, A}.
 
 -spec traverse(fn(A, applicative(B)), either(A, B)) -> applicative(either(A, B)).
 traverse(F, Either) when ?isF1(F) -> fmap(F, Either).
@@ -97,21 +97,18 @@ traverse(F, Either) when ?isF1(F) -> fmap(F, Either).
 bind(Either, F) when ?isF1(F) -> flat(fmap(F, Either)).
 
 -spec do(either(A, B), [fn(B, either(C, D)) | fn(either(C, D))]) -> either(A | C, D).
-do(Either, Fs) -> do_monad:do(Either, Fs, ?MODULE).
+do(Either, Fs) -> do_monad:do(Either, Fs).
 
 -spec lift(fn(A, B)) -> fn(monad(A), monad(B)).
 lift(F) -> do_monad:lift(F, ?MODULE).
 
 -spec liftm(fun(), [either(_, B)]) -> either(_, B).
-liftm(F, Eithers) -> do_monad:liftm(F, Eithers, ?MODULE).
+liftm(F, Eithers) -> do_monad:liftm(F, Eithers).
 
 -spec then(either(A, _), fn(either(B, C))) -> either(A | B, C).
-then(Either, F) -> do_monad:then(Either, F, ?MODULE).
+then(Either, F) -> do_monad:then(Either, F).
 
 %%%_* either ------------------------------------------------------------------
--spec liftmz(fun(), [fn(either(_, B))]) -> either(_, B).
-liftmz(F, Eithers) -> do_monad:liftmz(F, Eithers, ?MODULE).
-
 -spec either(fn(A, C), fn(B, C), Either :: either(A, B)) -> C.
 either(F1, F2, {error, A}) when ?isF1(F1), ?isF1(F2) -> F1(A);
 either(F1, F2, {ok, B})    when ?isF1(F1), ?isF1(F2) -> F2(B).
@@ -125,7 +122,6 @@ errors(Eithers) when is_list(Eithers) ->
 oks(Eithers) when is_list(Eithers) ->
   lists:filtermap(fun({ok, B})     -> {true, B};
                      ({error, _A}) -> false end, Eithers).
-
 
 -spec is_error(Either :: either(_, _)) -> boolean().
 is_error({error, _}) -> true;
@@ -157,6 +153,19 @@ flat({ok, {ok, B}})    -> {ok, B}.
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 
+append_test() ->
+  ?equals(mempty(),     append(mempty(), mempty())),
+  ?equals({error, foo}, append(mempty(), {error, foo})),
+  ?equals({error, foo}, append({error, foo}, mempty())),
+  ?equals(pure(1),      append(pure(1), mempty())),
+  ?equals(pure([1, 2]), append(pure([1]), pure([2]))),
+  ?equals(pure(1),      append(mempty(), pure(1))).
+
+foldr_test() ->
+  F = fun(A, B) -> A + B end,
+  ?equals(2, foldr(F, 1, {ok, 1})),
+  ?equals(1, foldr(F, 1, {error, 2})).
+
 pure_test() ->
   ?assertEqual({ok, {ok, 3}}, pure({ok, 3})),
   ?assertEqual({ok, 3},       pure(3)).
@@ -169,33 +178,41 @@ lift_test() ->
 
 liftA2_test() ->
   F = fun(A) -> A + 1 end,
-  ?assertEqual({ok, 3},      liftA2({ok, F},      {ok, 2})),
-  ?assertEqual({error, rsn}, liftA2({ok, F},      {error, rsn})),
-  ?assertEqual({error, rsn}, liftA2({error, rsn}, {ok, 2})),
-  ?assertEqual({error, rsn}, liftA2({error, rsn}, {error, rsn})).
+  ?equals({ok, 3},      liftA2({ok, F},      {ok, 2})),
+  ?equals({error, rsn}, liftA2({ok, F},      {error, rsn})),
+  ?equals({error, rsn}, liftA2({error, rsn}, {ok, 2})),
+  ?equals({error, rsn}, liftA2({error, rsn}, {error, rsn})).
+
+traverse_test() ->
+  F = fun(A) -> A + 1 end,
+  ?equals({ok, 2}, traverse(F, {ok, 1})).
+
+sequence_test() ->
+  ?equals([{ok, 1}],  sequence({ok, [1]})),
+  ?equals({error, 1}, sequence({error, 1})).
 
 liftm_test() ->
   F = fun(A, B, C) -> A + B + C end,
-  ?assertEqual({ok, 4},      liftm(F, [{ok, 1},      {ok, 2},      {ok, 1}])),
-  ?assertEqual({error, rsn}, liftm(F, [{ok, 1},      {error, rsn}, {ok, 1}])),
-  ?assertEqual({error, rsn}, liftm(F, [{error, rsn}, {ok, 2},      {ok, 1}])),
-  ?assertEqual({error, rsn}, liftm(F, [{error, rsn}, {error, rsn}, {ok, 1}])).
+  ?equals({ok, 4},      liftm(F, [{ok, 1},      {ok, 2},      {ok, 1}])),
+  ?equals({error, rsn}, liftm(F, [{ok, 1},      {error, rsn}, {ok, 1}])),
+  ?equals({error, rsn}, liftm(F, [{error, rsn}, {ok, 2},      {ok, 1}])),
+  ?equals({error, rsn}, liftm(F, [{error, rsn}, {error, rsn}, {ok, 1}])).
 
 bind_test() ->
   FOk    = fun(A) -> {ok, A + 1} end,
   FError = fun(_) -> {error, reason} end,
-  ?assertEqual({ok, 3},          bind({ok, 2}, FOk)),
-  ?assertEqual({error, reason},  bind({error, reason}, FOk)),
-  ?assertEqual({error, reason},  bind({ok, 2}, FError)),
-  ?assertEqual({error, reason1}, bind({error, reason1}, FError)).
+  ?equals({ok, 3},          bind({ok, 2}, FOk)),
+  ?equals({error, reason},  bind({error, reason}, FOk)),
+  ?equals({error, reason},  bind({ok, 2}, FError)),
+  ?equals({error, reason1}, bind({error, reason1}, FError)).
 
 do_test() ->
   Fun0 = fun() -> ?pure(3) end,
   Fun  = fun(A) -> ?pure(A + 1) end,
-  ?assertEqual({ok, 3},         do({ok, 3},           [])),
-  ?assertEqual({ok, 4},         do({ok, 3},           [Fun])),
-  ?assertEqual({ok, 4},         do({ok, 3},           [Fun0, Fun])),
-  ?assertEqual({error, reason}, do({error, reason},   [Fun])).
+  ?equals({ok, 3},         do({ok, 3},         [])),
+  ?equals({ok, 4},         do({ok, 3},         [Fun])),
+  ?equals({ok, 4},         do({ok, 3},         [Fun0, Fun])),
+  ?equals({error, reason}, do({error, reason}, [Fun])).
 
 either_test() ->
   F1 = fun(X) -> X end,

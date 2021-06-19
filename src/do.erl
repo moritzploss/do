@@ -7,7 +7,9 @@
 -module(do).
 
 %%%_* Exports =================================================================
--define(API, [ fmap/2,
+-define(API, [ append/2,
+               foldr/3,
+               fmap/2,
                liftA2/2,
                sequence/1,
                traverse/2,
@@ -15,6 +17,8 @@
                do/2,
                bind/2,
                then/2,
+               liftm/2,
+               liftmz/2,
                mod/1]).
 -export(?API).
 -ignore_xref(?API).
@@ -27,10 +31,16 @@
 %%%_* Macros ==================================================================
 -define(TRACE, element(2, process_info(self(), current_stacktrace))).
 -define(FMAP,  {_, _, 2, _}).
--define(DO,    {do_monad, do, 3, _}).
+-define(DO,    {do_monad, do, 2, _}).
 
 %%%_* Code ====================================================================
 %%%_* API ---------------------------------------------------------------------
+-spec append(semigroup(A), semigroup(A)) -> semigroup(A).
+append(S1, S2) -> do_semigroup:append(S1, S2).
+
+-spec foldr(fn(A, B, B), B, foldable(A)) -> B.
+foldr(F, B, Foldable) -> do_foldable:foldr(F, B, Foldable).
+
 -spec fmap(fn(A, B), functor(A)) -> functor(B).
 fmap(F, Functor) -> do_functor:fmap(F, Functor).
 
@@ -44,6 +54,12 @@ sequence(Traversable) -> do_traversable:sequence(Traversable).
   applicative(traversable(B)).
 traverse(F, Traversable) -> do_traversable:traverse(F, Traversable).
 
+-spec liftm(fun(), [monad(_)]) -> monad(_).
+liftm(F, Monads) -> do_monad:liftm(F, Monads).
+
+-spec liftmz(fun(), [fn(monad(_))]) -> monad(_).
+liftmz(F, Monads) -> do_monad:liftmz(F, Monads).
+
 -spec do(monad(A), [fn(A, monad(B)) | fn(monad(B))]) -> monad(B).
 do(Monad, Fs) -> do_monad:do(Monad, Fs).
 
@@ -52,6 +68,13 @@ bind(Monad, F) when ?isF1(F) -> do(Monad, [F]).
 
 -spec then(monad(_), fn(monad(B))) -> monad(B).
 then(Monad, F) when ?isF0(F) -> do(Monad, [F]).
+
+-spec pure(A) -> monad(A) | A.
+pure(A) ->
+  case ?TRACE of
+    [_, ?FMAP, {Monad, bind, 2, _}, ?DO | _] -> Monad:pure(A);
+    _Trace                                   -> A
+  end.
 
 -spec mod(Type :: term()) -> atom().
 mod(Type) when is_list(Type) -> do_list;
@@ -62,13 +85,6 @@ mod({ok, _})                 -> do_either;
 mod(nothing)                 -> do_maybe;
 mod({just, _})               -> do_maybe.
 
--spec pure(A) -> monad(A) | A.
-pure(A) ->
-  case ?TRACE of
-    [_, ?FMAP, {Monad, bind, 2, _}, ?DO | _] -> Monad:pure(A);
-    _Trace                                   -> A
-  end.
-
 %%%_* Tests ===================================================================
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
@@ -77,14 +93,9 @@ fmap_macro_test() ->
   F = fun(A) -> A + 1 end,
   ?assertEqual({ok, 2}, ?fmap(F, {ok, 1})).
 
-lift_macro_test() ->
-  F      = fun(A) -> A + 1 end,
-  Lifted = ?lift(F),
-  ?assertEqual({ok, 2},      Lifted({ok, 1})),
-  ?assertEqual({error, rsn}, Lifted({error, rsn})).
-
 sequence_macro_test() ->
-  ?assertEqual({ok, [1, 2]}, ?sequence([{ok, 1}, {ok, 2}])).
+  ?assertEqual({ok, [1, 2]},       ?sequence([{ok, 1}, {ok, 2}])),
+  ?assertEqual([{ok, 1}, {ok, 2}], ?sequence({ok, [1, 2]})).
 
 pure_test() ->
   F = fun(A) -> ?pure(A + 1) end,

@@ -1,28 +1,27 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% @doc The Applicative Type Class.
+%%% @doc The Foldable Type Class.
 %%% @end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%_* Module declaration ======================================================
--module(do_applicative).
+-module(do_foldable).
 
 %%%_* Exports =================================================================
--define(API, [liftA2/2]).
+-define(API, [foldr/3]).
 -export(?API).
 -ignore_xref(?API).
 
 %%%_* Includes ================================================================
 -include("do_types.hrl").
+-include("do_internal.hrl").
 
 %%%_* Callbacks ===============================================================
--callback pure(A) -> applicative(A).
--callback liftA2(applicative(fn(A, B)), applicative(A)) -> applicative(B).
+-callback fold_map(fn(A, monoid()), foldable(A)) -> monoid().
+-callback foldr(fn(A, B, B), B, foldable(A)) -> B.
+
+-optional_callbacks([fold_map/2]).
 
 %%%_* Code ====================================================================
 %%%_* API ---------------------------------------------------------------------
--spec liftA2(applicative(fn(A, B)), applicative(A)) -> applicative(B).
-liftA2(A1, A2) when is_list(A1) -> do_list:liftA2(A1, A2);
-liftA2({ok, _} = A1, A2)        -> do_either:liftA2(A1, A2);
-liftA2({error, _} = A1, A2)     -> do_either:liftA2(A1, A2);
-liftA2({just, _} = A1, A2)      -> do_maybe:liftA2(A1, A2);
-liftA2(nothing = A1, A2)        -> do_maybe:liftA2(A1, A2).
+-spec foldr(fn(A, B, B), B, foldable(A)) -> B.
+foldr(F, B, Foldable) -> ?Mod(Foldable):foldr(F, B, Foldable).

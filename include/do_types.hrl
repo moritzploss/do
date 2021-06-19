@@ -28,7 +28,8 @@
                         | maybe(A).
 
 -type monoid()       :: [monoid()]
-                        | maybe(monoid()).
+                        | maybe(monoid())
+                        | either(_, monoid()).
 
 -type semigroup(A)   :: [A]
                         | map(A)

@@ -12,25 +12,29 @@
 <h1>Module do_either</h1>
 <ul class="index"><li><a href="#description">Description</a></li><li><a href="#types">Data Types</a></li><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>The Either Monad.
 
-<p><b>Behaviours:</b> <a href="do_applicative.html"><tt>do_applicative</tt></a>, <a href="do_functor.html"><tt>do_functor</tt></a>, <a href="do_monad.html"><tt>do_monad</tt></a>.</p>
+<p><b>Behaviours:</b> <a href="do_applicative.html"><tt>do_applicative</tt></a>, <a href="do_foldable.html"><tt>do_foldable</tt></a>, <a href="do_functor.html"><tt>do_functor</tt></a>, <a href="do_monad.html"><tt>do_monad</tt></a>, <a href="do_monoid.html"><tt>do_monoid</tt></a>, <a href="do_semigroup.html"><tt>do_semigroup</tt></a>, <a href="do_traversable.html"><tt>do_traversable</tt></a>.</p>
 
 <h2><a name="description">Description</a></h2>The Either Monad.
 <h2><a name="types">Data Types</a></h2>
+
+<h3 class="typedecl"><a name="type-applicative">applicative()</a></h3>
+<p><tt>applicative(A) = [A] | <a href="#type-fn">fn</a>(term(), A) | <a href="#type-either">either</a>(term(), A) | <a href="#type-maybe">maybe</a>(A)</tt></p>
+
 
 <h3 class="typedecl"><a name="type-either">either()</a></h3>
 <p><tt>either(A, B) = {error, A} | {ok, B}</tt></p>
 
 
 <h3 class="typedecl"><a name="type-fn">fn()</a></h3>
-<p><tt>fn(A, B) = fun((A) -&gt; B)</tt></p>
+<p><tt>fn(A, B, C) = fun((A, B) -&gt; C)</tt></p>
 
 
 <h3 class="typedecl"><a name="type-fn">fn()</a></h3>
 <p><tt>fn(A) = fun(() -&gt; A)</tt></p>
 
 
-<h3 class="typedecl"><a name="type-map">map()</a></h3>
-<p><tt>map(A) = #{term() := A}</tt></p>
+<h3 class="typedecl"><a name="type-fn">fn()</a></h3>
+<p><tt>fn(A, B) = fun((A) -&gt; B)</tt></p>
 
 
 <h3 class="typedecl"><a name="type-maybe">maybe()</a></h3>
@@ -41,16 +45,14 @@
 <p><tt>monad(A) = [A] | <a href="#type-either">either</a>(term(), A) | <a href="#type-maybe">maybe</a>(A)</tt></p>
 
 
-<h3 class="typedecl"><a name="type-traversable">traversable()</a></h3>
-<p><tt>traversable(A) = [A] | <a href="#type-map">map</a>(A)</tt></p>
-
-
 <h2><a name="index">Function Index</a></h2>
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#bind-2">bind/2</a></td><td></td></tr>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#append-2">append/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#bind-2">bind/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#do-2">do/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#either-3">either/3</a></td><td></td></tr>
 <tr><td valign="top"><a href="#errors-1">errors/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#fmap-2">fmap/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#foldr-3">foldr/3</a></td><td></td></tr>
 <tr><td valign="top"><a href="#from_error-2">from_error/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#from_ok-2">from_ok/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#is_error-1">is_error/1</a></td><td></td></tr>
@@ -58,15 +60,22 @@
 <tr><td valign="top"><a href="#lift-1">lift/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#liftA2-2">liftA2/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#liftm-2">liftm/2</a></td><td></td></tr>
-<tr><td valign="top"><a href="#liftmz-2">liftmz/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#mempty-0">mempty/0</a></td><td></td></tr>
 <tr><td valign="top"><a href="#oks-1">oks/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#partition-1">partition/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#pure-1">pure/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#sequence-1">sequence/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#then-2">then/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#traverse-2">traverse/2</a></td><td></td></tr>
 </table>
 
 <h2><a name="functions">Function Details</a></h2>
+
+<h3 class="function"><a name="append-2">append/2</a></h3>
+<div class="spec">
+<p><tt>append(X1::<a href="#type-either">either</a>(A, B), X2::<a href="#type-either">either</a>(A, B)) -&gt; <a href="#type-either">either</a>(A, B)</tt><br></p>
+<p> </p>
+</div>
 
 <h3 class="function"><a name="bind-2">bind/2</a></h3>
 <div class="spec">
@@ -95,6 +104,12 @@
 <h3 class="function"><a name="fmap-2">fmap/2</a></h3>
 <div class="spec">
 <p><tt>fmap(F::<a href="#type-fn">fn</a>(B, C), Either::<a href="#type-either">either</a>(A, B)) -&gt; <a href="#type-either">either</a>(A, C)</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="foldr-3">foldr/3</a></h3>
+<div class="spec">
+<p><tt>foldr(F::<a href="#type-fn">fn</a>(B, C, C), B, X3::<a href="#type-either">either</a>(term(), B)) -&gt; C</tt><br></p>
 <p> </p>
 </div>
 
@@ -140,9 +155,9 @@
 <p> </p>
 </div>
 
-<h3 class="function"><a name="liftmz-2">liftmz/2</a></h3>
+<h3 class="function"><a name="mempty-0">mempty/0</a></h3>
 <div class="spec">
-<p><tt>liftmz(F::function(), Eithers::[<a href="#type-fn">fn</a>(<a href="#type-either">either</a>(term(), B))]) -&gt; <a href="#type-either">either</a>(term(), B)</tt><br></p>
+<p><tt>mempty() -&gt; <a href="#type-either">either</a>(atom(), term())</tt><br></p>
 <p> </p>
 </div>
 
@@ -166,13 +181,19 @@
 
 <h3 class="function"><a name="sequence-1">sequence/1</a></h3>
 <div class="spec">
-<p><tt>sequence(Eithers::<a href="#type-traversable">traversable</a>(<a href="#type-either">either</a>(A, B))) -&gt; <a href="#type-either">either</a>(A, <a href="#type-traversable">traversable</a>(B))</tt><br></p>
+<p><tt>sequence(Either::<a href="#type-either">either</a>(A, <a href="#type-applicative">applicative</a>(B))) -&gt; <a href="#type-applicative">applicative</a>(<a href="#type-either">either</a>(A, B))</tt><br></p>
 <p> </p>
 </div>
 
 <h3 class="function"><a name="then-2">then/2</a></h3>
 <div class="spec">
 <p><tt>then(Either::<a href="#type-either">either</a>(A, term()), F::<a href="#type-fn">fn</a>(<a href="#type-either">either</a>(B, C))) -&gt; <a href="#type-either">either</a>(A | B, C)</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="traverse-2">traverse/2</a></h3>
+<div class="spec">
+<p><tt>traverse(F::<a href="#type-fn">fn</a>(A, <a href="#type-applicative">applicative</a>(B)), Either::<a href="#type-either">either</a>(A, B)) -&gt; <a href="#type-applicative">applicative</a>(<a href="#type-either">either</a>(A, B))</tt><br></p>
 <p> </p>
 </div>
 <hr>

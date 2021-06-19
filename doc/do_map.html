@@ -12,10 +12,18 @@
 <h1>Module do_map</h1>
 <ul class="index"><li><a href="#description">Description</a></li><li><a href="#types">Data Types</a></li><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>The Map Functor.
 
-<p><b>Behaviours:</b> <a href="do_functor.html"><tt>do_functor</tt></a>.</p>
+<p><b>Behaviours:</b> <a href="do_functor.html"><tt>do_functor</tt></a>, <a href="do_monoid.html"><tt>do_monoid</tt></a>, <a href="do_semigroup.html"><tt>do_semigroup</tt></a>.</p>
 
 <h2><a name="description">Description</a></h2>The Map Functor.
 <h2><a name="types">Data Types</a></h2>
+
+<h3 class="typedecl"><a name="type-applicative">applicative()</a></h3>
+<p><tt>applicative(A) = [A] | <a href="#type-fn">fn</a>(term(), A) | <a href="#type-either">either</a>(term(), A) | <a href="#type-maybe">maybe</a>(A)</tt></p>
+
+
+<h3 class="typedecl"><a name="type-either">either()</a></h3>
+<p><tt>either(A, B) = {error, A} | {ok, B}</tt></p>
+
 
 <h3 class="typedecl"><a name="type-fn">fn()</a></h3>
 <p><tt>fn(A, B) = fun((A) -&gt; B)</tt></p>
@@ -25,15 +33,40 @@
 <p><tt>map(A) = #{term() := A}</tt></p>
 
 
+<h3 class="typedecl"><a name="type-maybe">maybe()</a></h3>
+<p><tt>maybe(A) = {just, A} | nothing</tt></p>
+
+
 <h2><a name="index">Function Index</a></h2>
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#fmap-2">fmap/2</a></td><td></td></tr>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#append-2">append/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#fmap-2">fmap/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#mempty-0">mempty/0</a></td><td></td></tr>
+<tr><td valign="top"><a href="#sequence-1">sequence/1</a></td><td></td></tr>
 </table>
 
 <h2><a name="functions">Function Details</a></h2>
 
+<h3 class="function"><a name="append-2">append/2</a></h3>
+<div class="spec">
+<p><tt>append(Map1::<a href="#type-map">map</a>(A), Map2::<a href="#type-map">map</a>(A)) -&gt; <a href="#type-map">map</a>(A)</tt><br></p>
+<p> </p>
+</div>
+
 <h3 class="function"><a name="fmap-2">fmap/2</a></h3>
 <div class="spec">
 <p><tt>fmap(F::<a href="#type-fn">fn</a>(A, B), Map::<a href="#type-map">map</a>(A)) -&gt; <a href="#type-map">map</a>(B)</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="mempty-0">mempty/0</a></h3>
+<div class="spec">
+<p><tt>mempty() -&gt; <a href="#type-map">map</a>(term())</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="sequence-1">sequence/1</a></h3>
+<div class="spec">
+<p><tt>sequence(Map::<a href="#type-map">map</a>(<a href="#type-applicative">applicative</a>(A))) -&gt; <a href="#type-applicative">applicative</a>(<a href="#type-map">map</a>(A))</tt><br></p>
 <p> </p>
 </div>
 <hr>
