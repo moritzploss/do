@@ -8,3 +8,5 @@
 
 -define(thunk(A),   fun() -> A end).
 -define(isThunk(A), ?isF0(A)).
+
+-define(Mod(A),     (do:mod(A))).

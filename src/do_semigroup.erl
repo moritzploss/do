@@ -19,7 +19,8 @@
 
 %%%_* Code ====================================================================
 %%%_* API ---------------------------------------------------------------------
-append(List1, List2) when is_list(List1), is_list(List2) -> do_list:append(List1, List2);
-append({just, _} = M1, {just, _} = M2)                   -> do_maybe:append(M1, M2);
-append(nothing = M1,   {just, _} = M2)                   -> do_maybe:append(M1, M2);
-append({just, _} = M1, nothing = M2)                     -> do_maybe:append(M1, M2).
+append(List1, List2) when is_list(List1) -> do_list:append(List1, List2);
+append(nothing = M1, M2)                 -> do_maybe:append(M1, M2);
+append({just, _} = M1, M2)               -> do_maybe:append(M1, M2);
+append({ok, _} = M1, M2)                 -> do_either:append(M1, M2);
+append({error, _} = M1, M2)              -> do_either:append(M1, M2).

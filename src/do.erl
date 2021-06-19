@@ -9,6 +9,8 @@
 %%%_* Exports =================================================================
 -define(API, [ fmap/2,
                liftA2/2,
+               sequence/1,
+               traverse/2,
                pure/1,
                do/2,
                bind/2,
@@ -19,7 +21,7 @@
 
 %%%_* Includes ================================================================
 -include("do_types.hrl").
--include("do_guards.hrl").
+-include("do_internal.hrl").
 -include("do.hrl").
 
 %%%_* Macros ==================================================================
@@ -35,12 +37,12 @@ fmap(F, Functor) -> do_functor:fmap(F, Functor).
 -spec liftA2(applicative(fn(A, B)), applicative(A)) -> applicative(B).
 liftA2(A1, A2) -> do_applicative:liftA2(A1, A2).
 
--spec pure(A) -> monad(A) | A.
-pure(A) ->
-  case ?TRACE of
-    [_, ?FMAP, {Monad, bind, 2, _}, ?DO | _] -> Monad:pure(A);
-    _Trace                                   -> A
-  end.
+-spec sequence(traversable(applicative(A))) -> applicative(traversable(A)).
+sequence(Traversable) -> do_traversable:sequence(Traversable).
+
+-spec traverse(fn(A, applicative(B)), traversable(A)) ->
+  applicative(traversable(B)).
+traverse(F, Traversable) -> do_traversable:traverse(F, Traversable).
 
 -spec do(monad(A), [fn(A, monad(B)) | fn(monad(B))]) -> monad(B).
 do(Monad, Fs) -> do_monad:do(Monad, Fs).
@@ -51,6 +53,7 @@ bind(Monad, F) when ?isF1(F) -> do(Monad, [F]).
 -spec then(monad(_), fn(monad(B))) -> monad(B).
 then(Monad, F) when ?isF0(F) -> do(Monad, [F]).
 
+-spec mod(Type :: term()) -> atom().
 mod(Type) when is_list(Type) -> do_list;
 mod(Type) when is_map(Type)  -> do_map;
 mod(Type) when ?isF1(Type)   -> do_fn;
@@ -58,6 +61,13 @@ mod({error, _})              -> do_either;
 mod({ok, _})                 -> do_either;
 mod(nothing)                 -> do_maybe;
 mod({just, _})               -> do_maybe.
+
+-spec pure(A) -> monad(A) | A.
+pure(A) ->
+  case ?TRACE of
+    [_, ?FMAP, {Monad, bind, 2, _}, ?DO | _] -> Monad:pure(A);
+    _Trace                                   -> A
+  end.
 
 %%%_* Tests ===================================================================
 -ifdef(TEST).

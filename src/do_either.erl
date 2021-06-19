@@ -6,17 +6,28 @@
 %%%_* Module declaration ======================================================
 -module(do_either).
 
+-behaviour(do_semigroup).
+-behaviour(do_foldable).
 -behaviour(do_functor).
 -behaviour(do_applicative).
+-behaviour(do_traversable).
 -behaviour(do_monad).
 
 %%%_* Exports =================================================================
--define(API, [ % functor
+-define(API, [ % semigroup
+               append/2,
+               % monoid
+               mempty/0,
+               % foldable
+               foldr/3,
+               % functor
                fmap/2,
                % applicative
                liftA2/2,
                pure/1,
+               % traversable
                sequence/1,
+               traverse/2,
                % monad
                bind/2,
                do/2,
@@ -38,15 +49,32 @@
 -ignore_xref(?API).
 
 %%%_* Includes ================================================================
--include("do_guards.hrl").
+-include("do_internal.hrl").
 -include("do_types.hrl").
 -include("do.hrl").
 
 %%%_* Code ====================================================================
+%%%_* semigroup ---------------------------------------------------------------
+-spec append(either(A, B), either(A, B)) -> either(A, B).
+append({ok, B1}, {ok, B2})         -> {ok, do_semigroup:append(B1, B2)};
+append({error, _}, {ok, B})        -> {ok, B};
+append({ok, B}, {error, _})        -> {ok, B};
+append({error, error}, {error, A}) -> {error, A};
+append({error, A}, {error, _})     -> {error, A}.
+
+%%%_* monoid ------------------------------------------------------------------
+-spec mempty() -> either(atom(), _).
+mempty() -> {error, error}.
+
+%%%_* foldable ----------------------------------------------------------------
+-spec foldr(fn(B, C, C), B, either(_, B)) -> C.
+foldr(_, Acc, {error, _}) -> Acc;
+foldr(F, Acc, {ok, A})    -> F(A, Acc).
+
 %%%_* functor -----------------------------------------------------------------
 -spec fmap(fn(B, C), Either :: either(A, B)) -> either(A, C).
 fmap(F, {error, A}) when ?isF1(F) -> {error, A};
-fmap(F, {ok, B})    when ?isF1(F) -> {ok, F(B)}. 
+fmap(F, {ok, B})    when ?isF1(F) -> {ok, F(B)}.
 
 %%%_* applicative -------------------------------------------------------------
 -spec liftA2(Either :: either(A1, fn(B, C)), either(A2, B)) -> either(A1 | A2, C).
@@ -56,8 +84,13 @@ liftA2({error, Reason}, _)            -> {error, Reason}.
 -spec pure(B) -> either(_, B).
 pure(B) -> {ok, B}.
 
--spec sequence(traversable(either(A, B))) -> either(A, traversable(B)).
-sequence(Eithers) -> do_traversable:sequence(Eithers, ?MODULE).
+%%%_* travsersable ------------------------------------------------------------
+-spec sequence(either(A, applicative(B))) -> applicative(either(A, B)).
+sequence({ok, Applicative} = Either) ->
+  do_traversable:sequence(Either, ?MODULE, ?Mod(Applicative)).
+
+-spec traverse(fn(A, applicative(B)), either(A, B)) -> applicative(either(A, B)).
+traverse(F, Either) when ?isF1(F) -> fmap(F, Either).
 
 %%%_* monad -------------------------------------------------------------------
 -spec bind(either(D, A), fn(A, either(B, C))) -> either(B | D, C).
@@ -163,12 +196,6 @@ do_test() ->
   ?assertEqual({ok, 4},         do({ok, 3},           [Fun])),
   ?assertEqual({ok, 4},         do({ok, 3},           [Fun0, Fun])),
   ?assertEqual({error, reason}, do({error, reason},   [Fun])).
-
-sequence_test() ->
-  ?assertEqual({ok, [1, 2, 3]},         sequence([{ok, 1}, {ok, 2}, {ok, 3}])),
-  ?assertEqual({error, reason},         sequence([{ok, 1}, {error, reason}, {ok, 3}])),
-  ?assertEqual({ok, #{a => 1, b => 2}}, sequence(#{a => {ok, 1}, b => {ok, 2}})),
-  ?assertEqual({error, reason},         sequence(#{a => {ok, 1}, b => {error, reason}})).
 
 either_test() ->
   F1 = fun(X) -> X end,

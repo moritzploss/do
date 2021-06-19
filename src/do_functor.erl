@@ -11,9 +11,8 @@
 -export(?API).
 -ignore_xref(?API).
 
-
 %%%_* Includes ================================================================
--include("do_guards.hrl").
+-include("do_internal.hrl").
 -include("do_types.hrl").
 
 %%%_* Callbacks ===============================================================

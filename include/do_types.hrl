@@ -14,7 +14,8 @@
                         | maybe(A).
 
 -type foldable(A)    :: [A]
-                        | maybe(A).
+                        | maybe(A)
+                        | either(_, A).
 
 -type functor(A)     :: [A]
                         | map(A)
@@ -30,9 +31,13 @@
                         | maybe(monoid()).
 
 -type semigroup(A)   :: [A]
+                        | map(A)
+                        | either(_, A)
                         | maybe(A).
 
--type traversable(A) :: [A] | map(A).
+-type traversable(A) :: [A]
+                        | either(_, A)
+                        | maybe(A).
 
 %%%_* other -------------------------------------------------------------------
 -type fn(A)          :: fun(() -> A).

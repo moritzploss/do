@@ -11,11 +11,13 @@
 -behaviour(do_foldable).
 -behaviour(do_functor).
 -behaviour(do_applicative).
+-behaviour(do_traversable).
 -behaviour(do_monad).
 
 %%%_* Exports =================================================================
 -define(API, [ % semigroup
                append/2,
+               % monoid
                mempty/0,
                % foldable
                foldr/3,
@@ -24,7 +26,9 @@
                % applicative
                liftA2/2,
                pure/1,
+               % traversable
                sequence/1,
+               traverse/2,
                % monad
                bind/2,
                do/2,
@@ -47,7 +51,7 @@
 -ignore_xref(?API).
 
 %%%_* Includes ================================================================
--include("do_guards.hrl").
+-include("do_internal.hrl").
 -include("do_types.hrl").
 -include("do.hrl").
 
@@ -55,8 +59,9 @@
 %%%_* semigroup ---------------------------------------------------------------
 -spec append(maybe(A), maybe(A)) -> maybe(A).
 append({just, A1}, {just, A2}) -> {just, do_semigroup:append(A1, A2)};
-append(nothing, {just, _})     -> nothing;
-append({just, _}, nothing)     -> nothing.
+append(nothing, {just, A})     -> {just, A};
+append({just, A}, nothing)     -> {just, A};
+append(nothing, nothing)       -> nothing.
 
 %%%_* monoid ------------------------------------------------------------------
 -spec mempty() -> maybe(_).
@@ -80,8 +85,13 @@ liftA2(nothing, _)                     -> nothing.
 -spec pure(A) -> maybe(A).
 pure(A) -> {just, A}.
 
--spec sequence(traversable(maybe(A))) -> maybe(traversable(A)).
-sequence(Maybes) -> do_traversable:sequence(Maybes, ?MODULE).
+%%%_* traversable -------------------------------------------------------------
+-spec sequence(maybe(applicative(A))) -> applicative(maybe(A)).
+sequence({just, Applicative} = Maybe) ->
+  do_traversable:sequence(Maybe, ?MODULE, ?Mod(Applicative)).
+
+-spec traverse(fn(A, applicative(B)), maybe(A)) -> applicative(maybe(B)).
+traverse(F, Maybe) when ?isF1(F) -> fmap(F, Maybe).
 
 %%%_* monad -------------------------------------------------------------------
 -spec bind(maybe(A), fn(A, maybe(B))) -> maybe(B).
@@ -147,6 +157,9 @@ flat({just, {just, A}}) -> {just, A}.
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 
+sequence_list_test() ->
+  ?assertEqual([{just, 1}], sequence({just, [1]})).
+
 pure_test() ->
   ?assertEqual({just, {just, 3}}, pure({just, 3})),
   ?assertEqual({just, 3},       pure(3)).
@@ -183,12 +196,6 @@ bind_test() ->
   ?assertEqual(nothing,   bind(nothing, Fjust)),
   ?assertEqual(nothing,   bind({just, 2}, Fnothing)),
   ?assertEqual(nothing,   bind(nothing, Fnothing)).
-
-sequence_test() ->
-  ?assertEqual({just, [1, 2, 3]},         sequence([{just, 1}, {just, 2}, {just, 3}])),
-  ?assertEqual(nothing,                   sequence([{just, 1}, nothing, {just, 3}])),
-  ?assertEqual({just, #{a => 1, b => 2}}, sequence(#{a => {just, 1}, b => {just, 2}})),
-  ?assertEqual(nothing,                   sequence(#{a => {just, 1}, b => nothing})).
 
 do_test() ->
   Fun0 = fun() -> ?pure(5) end,

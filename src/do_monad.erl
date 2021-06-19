@@ -15,7 +15,7 @@
 -export([then/3]).
 
 %%%_* Includes ================================================================
--include("do_guards.hrl").
+-include("do_internal.hrl").
 -include("do_types.hrl").
 
 %%%_* Callbacks ===============================================================
@@ -32,11 +32,11 @@ lift(F, Mod) when ?isF1(F) -> fun(Monad) -> Mod:liftm(F, [Monad]) end.
 
 -spec liftm(fun(), [monad(_)], atom()) -> monad(_).
 liftm(F, Monads, Mod) when ?isF(F, length(Monads)) ->
-  do_liftm(F, Monads, Mod, fun do_traversable:sequence/2).
+  do_liftm(F, Monads, Mod, fun do_traversable:sequence/1).
 
 -spec liftmz(fun(), [fn(monad(_))], atom()) -> monad(_).
 liftmz(F, Thunks, Mod) when ?isF(F, length(Thunks)) ->
-  do_liftm(F, Thunks, Mod, fun do_traversable:sequencez/2).
+  do_liftm(F, Thunks, Mod, fun do_list:sequencez/1).
 
 -spec do(monad(A), [fn(A, monad(B)) | fn(monad(B))]) -> monad(B).
 do(Monad, Fs) when is_list(Monad) -> do_list:do(Monad, Fs);
@@ -55,4 +55,4 @@ then(Monad, F, Mod) when ?isF0(F) -> Mod:bind(Monad, fun(_) -> F() end).
 
 %%%_* Internal ----------------------------------------------------------------
 do_liftm(F, Monads, Mod, Sequence) ->
-  Mod:fmap(fun(Args) -> apply(F, Args) end, Sequence(Monads, Mod)).
+  Mod:fmap(fun(Args) -> apply(F, Args) end, Sequence(Monads)).

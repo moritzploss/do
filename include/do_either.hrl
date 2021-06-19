@@ -1,4 +1,3 @@
--define(sequence(Traversable), do_either:sequence(Traversable)).
 -define(lift(F),               do_either:lift(F)).
 
 -ifndef(thunk).
