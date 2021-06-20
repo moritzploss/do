@@ -1,14 +1,13 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% @doc The Applicative Type Class.
+%%% @doc The Monoid Type Class.
 %%% @end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%_* Module declaration ======================================================
--module(do_applicative).
+-module(do_monoid).
 
 %%%_* Includes ================================================================
 -include("do_types.hrl").
 
 %%%_* Callbacks ===============================================================
--callback pure(A) -> applicative(A).
--callback liftA2(applicative(fn(A, B)), applicative(A)) -> applicative(B).
+-callback mempty() -> semigroup(_).

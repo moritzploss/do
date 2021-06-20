@@ -8,3 +8,12 @@
 
 -define(thunk(A),   fun() -> A end).
 -define(isThunk(A), ?isF0(A)).
+
+-define(Mod(A),     (do:mod(A))).
+
+-ifdef(TEST).
+    -define(equals(A, B), begin
+        ?assertEqual(A, B),
+        ?assertEqual(A, do:B)
+    end).
+-endif.

@@ -12,7 +12,7 @@ instances.
 To install the latest release from [`hex`](https://hex.pm/packages/do),
 add `do` to the `deps` in your rebar config file:
 
-    {do, "1.9.2"}
+    {do, "1.10.0"}
 
 ### What's in the box
 

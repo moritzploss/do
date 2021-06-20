@@ -1,20 +1,23 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% @doc The Fun Functor.
+%%% @doc The Semigroup Type Class.
 %%% @end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%_* Module declaration ======================================================
--module(do_fn).
-
--behaviour(do_functor).
+-module(do_semigroup).
 
 %%%_* Exports =================================================================
--export([fmap/2]).
+-define(API, [append/2]).
+-export(?API).
+-ignore_xref(?API).
 
 %%%_* Includes ================================================================
--include("do_guards.hrl").
 -include("do_types.hrl").
+-include("do_internal.hrl").
+
+%%%_* Callbacks ===============================================================
+-callback append(semigroup(A), semigroup(A)) -> semigroup(A).
 
 %%%_* Code ====================================================================
--spec fmap(fn(B, C), fn(A, B)) -> fn(A, C).
-fmap(F, Fun) when ?isF1(F), ?isF1(Fun) -> fun(Arg) -> F(Fun(Arg)) end.
+%%%_* API ---------------------------------------------------------------------
+append(S1, S2) -> ?Mod(S1):append(S1, S2).

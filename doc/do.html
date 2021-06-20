@@ -25,11 +25,19 @@
 
 
 <h3 class="typedecl"><a name="type-fn">fn()</a></h3>
-<p><tt>fn(A, B) = fun((A) -&gt; B)</tt></p>
+<p><tt>fn(A, B, C) = fun((A, B) -&gt; C)</tt></p>
 
 
 <h3 class="typedecl"><a name="type-fn">fn()</a></h3>
 <p><tt>fn(A) = fun(() -&gt; A)</tt></p>
+
+
+<h3 class="typedecl"><a name="type-fn">fn()</a></h3>
+<p><tt>fn(A, B) = fun((A) -&gt; B)</tt></p>
+
+
+<h3 class="typedecl"><a name="type-foldable">foldable()</a></h3>
+<p><tt>foldable(A) = [A] | <a href="#type-maybe">maybe</a>(A) | <a href="#type-either">either</a>(term(), A)</tt></p>
 
 
 <h3 class="typedecl"><a name="type-functor">functor()</a></h3>
@@ -48,16 +56,37 @@
 <p><tt>monad(A) = [A] | <a href="#type-either">either</a>(term(), A) | <a href="#type-maybe">maybe</a>(A)</tt></p>
 
 
+<h3 class="typedecl"><a name="type-semigroup">semigroup()</a></h3>
+<p><tt>semigroup(A) = [A] | <a href="#type-map">map</a>(A) | <a href="#type-either">either</a>(term(), A) | <a href="#type-maybe">maybe</a>(A)</tt></p>
+
+
+<h3 class="typedecl"><a name="type-traversable">traversable()</a></h3>
+<p><tt>traversable(A) = [A] | <a href="#type-either">either</a>(term(), A) | <a href="#type-maybe">maybe</a>(A)</tt></p>
+
+
 <h2><a name="index">Function Index</a></h2>
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#bind-2">bind/2</a></td><td></td></tr>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#append-2">append/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#bind-2">bind/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#do-2">do/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#fmap-2">fmap/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#foldr-3">foldr/3</a></td><td></td></tr>
 <tr><td valign="top"><a href="#liftA2-2">liftA2/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#liftm-2">liftm/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#liftmz-2">liftmz/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#mod-1">mod/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#pure-1">pure/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#sequence-1">sequence/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#then-2">then/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#traverse-2">traverse/2</a></td><td></td></tr>
 </table>
 
 <h2><a name="functions">Function Details</a></h2>
+
+<h3 class="function"><a name="append-2">append/2</a></h3>
+<div class="spec">
+<p><tt>append(S1::<a href="#type-semigroup">semigroup</a>(A), S2::<a href="#type-semigroup">semigroup</a>(A)) -&gt; <a href="#type-semigroup">semigroup</a>(A)</tt><br></p>
+<p> </p>
+</div>
 
 <h3 class="function"><a name="bind-2">bind/2</a></h3>
 <div class="spec">
@@ -77,9 +106,33 @@
 <p> </p>
 </div>
 
+<h3 class="function"><a name="foldr-3">foldr/3</a></h3>
+<div class="spec">
+<p><tt>foldr(F::<a href="#type-fn">fn</a>(A, B, B), B, Foldable::<a href="#type-foldable">foldable</a>(A)) -&gt; B</tt><br></p>
+<p> </p>
+</div>
+
 <h3 class="function"><a name="liftA2-2">liftA2/2</a></h3>
 <div class="spec">
 <p><tt>liftA2(A1::<a href="#type-applicative">applicative</a>(<a href="#type-fn">fn</a>(A, B)), A2::<a href="#type-applicative">applicative</a>(A)) -&gt; <a href="#type-applicative">applicative</a>(B)</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="liftm-2">liftm/2</a></h3>
+<div class="spec">
+<p><tt>liftm(F::function(), Monads::[<a href="#type-monad">monad</a>(term())]) -&gt; <a href="#type-monad">monad</a>(term())</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="liftmz-2">liftmz/2</a></h3>
+<div class="spec">
+<p><tt>liftmz(F::function(), Monads::[<a href="#type-fn">fn</a>(<a href="#type-monad">monad</a>(term()))]) -&gt; <a href="#type-monad">monad</a>(term())</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="mod-1">mod/1</a></h3>
+<div class="spec">
+<p><tt>mod(Type::term()) -&gt; atom()</tt><br></p>
 <p> </p>
 </div>
 
@@ -89,9 +142,21 @@
 <p> </p>
 </div>
 
+<h3 class="function"><a name="sequence-1">sequence/1</a></h3>
+<div class="spec">
+<p><tt>sequence(Traversable::<a href="#type-traversable">traversable</a>(<a href="#type-applicative">applicative</a>(A))) -&gt; <a href="#type-applicative">applicative</a>(<a href="#type-traversable">traversable</a>(A))</tt><br></p>
+<p> </p>
+</div>
+
 <h3 class="function"><a name="then-2">then/2</a></h3>
 <div class="spec">
 <p><tt>then(Monad::<a href="#type-monad">monad</a>(term()), F::<a href="#type-fn">fn</a>(<a href="#type-monad">monad</a>(B))) -&gt; <a href="#type-monad">monad</a>(B)</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="traverse-2">traverse/2</a></h3>
+<div class="spec">
+<p><tt>traverse(F::<a href="#type-fn">fn</a>(A, <a href="#type-applicative">applicative</a>(B)), Traversable::<a href="#type-traversable">traversable</a>(A)) -&gt; <a href="#type-applicative">applicative</a>(<a href="#type-traversable">traversable</a>(B))</tt><br></p>
 <p> </p>
 </div>
 <hr>

@@ -7,52 +7,36 @@
 -module(do_traversable).
 
 %%%_* Exports =================================================================
--define(API, [ sequence/2,
-               sequencez/2,
+-define(API, [ sequence/1,
+               sequence/3,
                traverse/2]).
 -export(?API).
 -ignore_xref(?API).
 
 %%%_* Includes ================================================================
--include("do_guards.hrl").
+-include("do_internal.hrl").
 -include("do_types.hrl").
 
-%%%_* Macros ==================================================================
--define(LAZY,    lazy).
--define(THUNK,   thunk).
--define(DEFAULT, default).
+%%%_* Callbacks ===============================================================
+-callback traverse(fn(A, applicative(B)), traversable(A)) -> applicative(traversable(B)).
+-callback sequence(traversable(applicative(A))) -> applicative(traversable(A)).
 
 %%%_* Code ====================================================================
 %%%_* API ---------------------------------------------------------------------
--spec sequence(traversable(applicative(A)), atom()) ->
-  applicative(traversable(A)).
-sequence(Traversable, Mod) ->
-  sequence(Traversable, Mod, ?DEFAULT).
+-spec sequence(traversable(applicative(A))) -> applicative(traversable(A)).
+sequence(Traversable) -> ?Mod(Traversable):sequence(Traversable).
 
--spec sequencez(traversable(fn(applicative(A))), atom()) ->
+-spec sequence(traversable(applicative(A)), atom(), atom()) ->
   applicative(traversable(A)).
-sequencez(Traversable, Mod) ->
-  sequence(Traversable, Mod, ?LAZY).
+sequence(Traversable, T, A) ->
+  T:foldr(fun(VBox, AccBox) ->
+    Curried = fun(V) -> fun(Acc) -> T:append(T:pure(V), Acc) end end,
+    A:liftA2(A:fmap(Curried, VBox), AccBox)
+  end, A:pure(T:mempty()), Traversable).
 
 -spec traverse(fn(A, applicative(B)), traversable(A)) ->
   applicative(traversable(B)).
 traverse(F, Traversable) when ?isF1(F) -> do:fmap(F, Traversable).
-
-%%%_* internal ----------------------------------------------------------------
-sequence([F | Rest], Mod, ?LAZY) when ?isF0(F) ->
-  sequence([F() | Rest], Mod, ?THUNK);
-sequence([Elm | Rest], Mod, Mode) ->
-  Applicative = Mod:fmap(fun(Val) -> fun(Vals) -> [Val | Vals] end end, Elm),
-  Mod:liftA2(Applicative, sequence(Rest, Mod, reset(Mode)));
-sequence([], Mod, _Mode) ->
-  Mod:pure([]);
-sequence(Map, Mod, Mode) when is_map(Map) ->
-  {Keys, Vals} = lists:unzip(maps:to_list(Map)),
-  Mod:fmap(fun(Sequenced) -> maps:from_list(lists:zip(Keys, Sequenced)) end,
-           sequence(Vals, Mod, Mode)).
-
-reset(?THUNK)   -> ?LAZY;
-reset(?DEFAULT) -> ?DEFAULT.
 
 %%%_* Tests ===================================================================
 -ifdef(TEST).

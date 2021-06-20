@@ -22,11 +22,11 @@
 
 
 <h3 class="typedecl"><a name="type-fn">fn()</a></h3>
-<p><tt>fn(A, B) = fun((A) -&gt; B)</tt></p>
+<p><tt>fn(A) = fun(() -&gt; A)</tt></p>
 
 
 <h3 class="typedecl"><a name="type-fn">fn()</a></h3>
-<p><tt>fn(A) = fun(() -&gt; A)</tt></p>
+<p><tt>fn(A, B) = fun((A) -&gt; B)</tt></p>
 
 
 <h3 class="typedecl"><a name="type-maybe">maybe()</a></h3>
@@ -38,18 +38,18 @@
 
 
 <h2><a name="index">Function Index</a></h2>
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#do-3">do/3</a></td><td></td></tr>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#do-2">do/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#lift-2">lift/2</a></td><td></td></tr>
-<tr><td valign="top"><a href="#liftm-3">liftm/3</a></td><td></td></tr>
-<tr><td valign="top"><a href="#liftmz-3">liftmz/3</a></td><td></td></tr>
-<tr><td valign="top"><a href="#then-3">then/3</a></td><td></td></tr>
+<tr><td valign="top"><a href="#liftm-2">liftm/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#liftmz-2">liftmz/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#then-2">then/2</a></td><td></td></tr>
 </table>
 
 <h2><a name="functions">Function Details</a></h2>
 
-<h3 class="function"><a name="do-3">do/3</a></h3>
+<h3 class="function"><a name="do-2">do/2</a></h3>
 <div class="spec">
-<p><tt>do(Monad::<a href="#type-monad">monad</a>(A), Fs::[<a href="#type-fn">fn</a>(A, <a href="#type-monad">monad</a>(B)) | <a href="#type-fn">fn</a>(<a href="#type-monad">monad</a>(B))], Mod::atom()) -&gt; <a href="#type-monad">monad</a>(B)</tt><br></p>
+<p><tt>do(Monad::<a href="#type-monad">monad</a>(A), Fs::[<a href="#type-fn">fn</a>(A, <a href="#type-monad">monad</a>(B)) | <a href="#type-fn">fn</a>(<a href="#type-monad">monad</a>(B))]) -&gt; <a href="#type-monad">monad</a>(B)</tt><br></p>
 <p> </p>
 </div>
 
@@ -59,21 +59,21 @@
 <p> </p>
 </div>
 
-<h3 class="function"><a name="liftm-3">liftm/3</a></h3>
+<h3 class="function"><a name="liftm-2">liftm/2</a></h3>
 <div class="spec">
-<p><tt>liftm(F::function(), Monads::[<a href="#type-monad">monad</a>(term())], Mod::atom()) -&gt; <a href="#type-monad">monad</a>(term())</tt><br></p>
+<p><tt>liftm(F::function(), Monads::[<a href="#type-monad">monad</a>(term())]) -&gt; <a href="#type-monad">monad</a>(term())</tt><br></p>
 <p> </p>
 </div>
 
-<h3 class="function"><a name="liftmz-3">liftmz/3</a></h3>
+<h3 class="function"><a name="liftmz-2">liftmz/2</a></h3>
 <div class="spec">
-<p><tt>liftmz(F::function(), Thunks::[<a href="#type-fn">fn</a>(<a href="#type-monad">monad</a>(term()))], Mod::atom()) -&gt; <a href="#type-monad">monad</a>(term())</tt><br></p>
+<p><tt>liftmz(F::function(), Ts::[<a href="#type-fn">fn</a>(<a href="#type-monad">monad</a>(term()))]) -&gt; <a href="#type-monad">monad</a>(term())</tt><br></p>
 <p> </p>
 </div>
 
-<h3 class="function"><a name="then-3">then/3</a></h3>
+<h3 class="function"><a name="then-2">then/2</a></h3>
 <div class="spec">
-<p><tt>then(Monad::<a href="#type-monad">monad</a>(term()), F::<a href="#type-fn">fn</a>(<a href="#type-monad">monad</a>(A)), Mod::atom()) -&gt; <a href="#type-monad">monad</a>(A)</tt><br></p>
+<p><tt>then(Monad::<a href="#type-monad">monad</a>(term()), F::<a href="#type-fn">fn</a>(<a href="#type-monad">monad</a>(A))) -&gt; <a href="#type-monad">monad</a>(A)</tt><br></p>
 <p> </p>
 </div>
 <hr>
