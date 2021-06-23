@@ -1,12 +1,12 @@
 -include("do_traversable.hrl").
 
--define(bind(Monad, F),       do:bind(Monad, F)).
--define(then(Monad1, Monad2), do:then(Monad1, fun() -> Monad2 end)).
--define(do(Monad, Fs),        do:do(Monad, Fs)).
-
 -ifndef(thunk).
   -define(thunk(A), fun() -> A end).
 -endif.
+
+-define(bind(Monad, F),       do:bind(Monad, F)).
+-define(then(Monad1, Monad2), do:then(Monad1, ?thunk(Monad2))).
+-define(do(Monad, Fs),        do:do(Monad, Fs)).
 
 -define(liftm(F, A1),
         do_monad:liftmz(F, [?thunk(A1)])).
