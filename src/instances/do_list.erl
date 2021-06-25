@@ -15,19 +15,26 @@
 -behaviour(do_monad).
 
 %%%_* Exports =================================================================
--define(API, [ append/2,
+-define(API, [ % semigroup
+               append/2,
+               % monoid
                mempty/0,
+               % foldable
                foldr/3,
-               bind/2,
-               do/2,
+               % functor
                fmap/2,
-               lift/1,
+               % applicative
                liftA2/2,
-               liftm/2,
                pure/1,
+               % traversable
                sequence/1,
                sequencez/1,
                traverse/2,
+               % monad
+               bind/2,
+               do/2,
+               lift/1,
+               liftm/2,
                then/2]).
 -export(?API).
 -ignore_xref(?API).
@@ -93,7 +100,9 @@ then(List, F) -> do_monad:then(List, F).
 
 %%%_* internal ----------------------------------------------------------------
 flat(List) -> lists:concat(List).
- 
+
+%% more efficient than the default implementation in do:traversable since the
+%% list is only traversed to the end if necessary
 sequence([Head | Rest], Mode) ->
   Elm         = get_elm(Head, Mode),
   Mod         = ?Mod(Elm),

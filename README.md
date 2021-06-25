@@ -2,29 +2,25 @@
 
 ## do
 
-This package brings monads, applicatives, functors, and `do`-notation to
-Erlang. Inspired by Haskell's type system, it provides behaviours for a range
-of useful type classes, as well as implementations for commonly used class
-instances.
+This package brings Haskell-style type classes to Erlang, including
+monads, applicatives, functors, and traversables. It provides implementations
+of commonly used class instances, as well as useful utility functions.
 
 ### Installation
 
-To install the latest release from [`hex`](https://hex.pm/packages/do),
-add `do` to the `deps` in your rebar config file:
+To install the latest release from [`hex`](https://hex.pm/packages/do), add
+`do` to the `deps` in your rebar3 config file:
 
-    {do, "1.10.0"}
+    {do, "1.10.1"}
 
 ### What's in the box
 
-The `do` package provides implementations for [`either`](./src/do_either.erl),
-[`list`](./src/do_list.erl) and [`maybe`](./src/do_maybe.erl) monads, as well
-as a range of useful functors. See [do_types.hrl](./include/do_types.hrl) for
-type definitions, and [hex docs](https://hexdocs.pm/do/) for a complete
-overview of functions and types.
+The `do` package implements [`either`](./src/do_either.erl), [`list`](./src/do_list.erl) and [`maybe`](./src/do_maybe.erl) monads. For a complete overview
+of types and functions, refer to [`do_types.hrl`](./include/do_types.hrl) and [`do`'s docs on hex](https://hexdocs.pm/do/).
 
-### The fmap macro
+### fmap
 
-The `?fmap` macro can be used to map functions over functors:
+Use the `?fmap` macro or `do:fmap/2` to map functions over functors:
 
 ```erlang
 -include_lib("do/include/do.hrl").
@@ -40,10 +36,10 @@ fmap_example() ->
   #{a => 2}       = ?fmap(fun add1/1, #{a => 1}).
 ```
 
-### The bind macro
+### bind
 
-The `?bind` macro can be used to bind (`>>=`) a function that returns
-a monad to a monad of the same type. For example (with
+Use the `?bind` macro or `do:bind/2` to bind (`>>=`) a function that returns a
+monad to a monad of the same type. For example (with
 [`either`](./src/do_either.erl) monad):
 
 ```erlang
@@ -57,12 +53,12 @@ bind_example() ->
   {error, not_1} = ?bind({ok, 2}, fun maybe_add1/1).
 ```
 
-### The then macro
+### then
 
-The `?then` macro can be used to chain (`>>`) monadic expressions of the same
-type. The second argument to `?then` is automatically wrapped in a thunk that
-will only be executed if the first argument indicates success. For example
-(with [`list`](./src/do_list.erl) monad):
+Use the `?then` macro or `do:then/2` to chain (`>>`) monadic expressions of the
+same type. The second argument to `?then` is wrapped in a thunk that will only
+be executed if the first argument indicates success. For example (with
+[`list`](./src/do_list.erl) monad):
 
 ```erlang
 -include_lib("do/include/do.hrl").
@@ -76,13 +72,13 @@ then_example() ->
   [2] = ?then([5], maybe_add1(1)).
 ```
 
-### The do macro
+### do
 
-The `?do` macro consecutively binds (`>>=` or `>>`) monads and functions. The
-macro takes a start value (a monad), and a list of functions. The functions
-must each take either 0 or 1 argument(s) and must return a monad. On execution,
-the start value is passed to the first function, and is then piped through
-consecutive functions using `bind` or `then`. For example (with
+Use the `?do` macro or `do:do/2` to consecutively bind (`>>=` or `>>`) monads
+and functions. The macro takes a start value (a monad), and a list of functions.
+The functions must each take either 0 or 1 argument(s) and must return a monad.
+On execution, the start value is passed to the first function, and is then
+piped through consecutive functions using `bind` or `then`. For example (with
 [`maybe`](./src/do_maybe.erl) monad):
 
 ```erlang

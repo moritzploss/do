@@ -7,18 +7,25 @@
 -module(do).
 
 %%%_* Exports =================================================================
--define(API, [ append/2,
+-define(API, [ % semigroup
+               append/2,
+               % foldable
                foldr/3,
+               % functor
                fmap/2,
+               % applicative
                liftA2/2,
+               pure/1,
+               % traversable
                sequence/1,
                traverse/2,
-               pure/1,
-               do/2,
+               % monad
                bind/2,
-               then/2,
+               do/2,
                liftm/2,
                liftmz/2,
+               then/2,
+               % helpers
                mod/1]).
 -export(?API).
 -ignore_xref(?API).
@@ -34,19 +41,30 @@
 -define(DO,    {do_monad, do, 2, _}).
 
 %%%_* Code ====================================================================
-%%%_* API ---------------------------------------------------------------------
+%%%_* semigroup ---------------------------------------------------------------
 -spec append(semigroup(A), semigroup(A)) -> semigroup(A).
 append(S1, S2) -> do_semigroup:append(S1, S2).
 
+%%%_* foldable ----------------------------------------------------------------
 -spec foldr(fn(A, B, B), B, foldable(A)) -> B.
 foldr(F, B, Foldable) -> do_foldable:foldr(F, B, Foldable).
 
+%%%_* functor -----------------------------------------------------------------
 -spec fmap(fn(A, B), functor(A)) -> functor(B).
 fmap(F, Functor) -> do_functor:fmap(F, Functor).
 
+%%%_* applicative -------------------------------------------------------------
 -spec liftA2(applicative(fn(A, B)), applicative(A)) -> applicative(B).
 liftA2(A1, A2) -> do_applicative:liftA2(A1, A2).
 
+-spec pure(A) -> monad(A) | A.
+pure(A) ->
+  case ?TRACE of
+    [_, ?FMAP, {Monad, bind, 2, _}, ?DO | _] -> Monad:pure(A);
+    _Trace                                   -> A
+  end.
+
+%%%_* traversable -------------------------------------------------------------
 -spec sequence(traversable(applicative(A))) -> applicative(traversable(A)).
 sequence(Traversable) -> do_traversable:sequence(Traversable).
 
@@ -54,6 +72,7 @@ sequence(Traversable) -> do_traversable:sequence(Traversable).
   applicative(traversable(B)).
 traverse(F, Traversable) -> do_traversable:traverse(F, Traversable).
 
+%%%_* monad -------------------------------------------------------------------
 -spec liftm(fun(), [monad(_)]) -> monad(_).
 liftm(F, Monads) -> do_monad:liftm(F, Monads).
 
@@ -69,13 +88,7 @@ bind(Monad, F) when ?isF1(F) -> do(Monad, [F]).
 -spec then(monad(_), fn(monad(B))) -> monad(B).
 then(Monad, F) when ?isF0(F) -> do(Monad, [F]).
 
--spec pure(A) -> monad(A) | A.
-pure(A) ->
-  case ?TRACE of
-    [_, ?FMAP, {Monad, bind, 2, _}, ?DO | _] -> Monad:pure(A);
-    _Trace                                   -> A
-  end.
-
+%%%_* helpers -----------------------------------------------------------------
 -spec mod(Type :: term()) -> atom().
 mod(Type) when is_list(Type) -> do_list;
 mod(Type) when is_map(Type)  -> do_map;
