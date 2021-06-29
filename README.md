@@ -11,7 +11,7 @@ of commonly used class instances, as well as useful utility functions.
 To install the latest release from [`hex`](https://hex.pm/packages/do), add
 `do` to the `deps` in your rebar3 config file:
 
-    {do, "1.10.1"}
+    {do, "1.10.2"}
 
 ### What's in the box
 
