@@ -42,7 +42,7 @@ mempty() -> #{}.
 fmap(F, Map) when ?isF1(F) -> maps:map(fun(_, V) -> F(V) end, Map).
 
 %%%_* map ---------------------------------------------------------------------
-%% maps aren't traversable in two directions since they arent't instances of
+%% maps aren't traversable in two directions since they aren't instances of
 %% the applicative type class (no implementation for pure/1). however, it's
 %% possible to implement a one-directional sequence function
 %% map(applicative) -> applicative(map)

@@ -84,7 +84,7 @@ liftA2({error, Reason}, _)            -> {error, Reason}.
 -spec pure(B) -> either(_, B).
 pure(B) -> {ok, B}.
 
-%%%_* travsersable ------------------------------------------------------------
+%%%_* traversable ------------------------------------------------------------
 -spec sequence(either(A, applicative(B))) -> applicative(either(A, B)).
 sequence({ok, B} = Either) -> do_traversable:sequence(Either, ?MODULE, ?Mod(B));
 sequence({error, A})       -> {error, A}.

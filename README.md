@@ -11,12 +11,15 @@ of commonly used class instances, as well as useful utility functions.
 To install the latest release from [`hex`](https://hex.pm/packages/do), add
 `do` to the `deps` in your rebar3 config file:
 
-    {do, "1.10.1"}
+    {do, "1.10.2"}
 
 ### What's in the box
 
-The `do` package implements [`either`](./src/do_either.erl), [`list`](./src/do_list.erl) and [`maybe`](./src/do_maybe.erl) monads. For a complete overview
-of types and functions, refer to [`do_types.hrl`](./include/do_types.hrl) and [`do`'s docs on hex](https://hexdocs.pm/do/).
+The `do` package implements [`either`](./src/instances/do_either.erl),
+[`list`](./src/instances/do_list.erl), and
+[`maybe`](./src/instances/do_maybe.erl) monads. For a complete overview
+of types and functions, refer to [`do_types.hrl`](./include/do_types.hrl) and
+[`do`'s docs on hex](https://hexdocs.pm/do/).
 
 ### fmap
 
@@ -40,7 +43,7 @@ fmap_example() ->
 
 Use the `?bind` macro or `do:bind/2` to bind (`>>=`) a function that returns a
 monad to a monad of the same type. For example (with
-[`either`](./src/do_either.erl) monad):
+[`either`](./src/instances/do_either.erl) monad):
 
 ```erlang
 -include_lib("do/include/do.hrl").
@@ -58,7 +61,7 @@ bind_example() ->
 Use the `?then` macro or `do:then/2` to chain (`>>`) monadic expressions of the
 same type. The second argument to `?then` is wrapped in a thunk that will only
 be executed if the first argument indicates success. For example (with
-[`list`](./src/do_list.erl) monad):
+[`list`](./src/instances/do_list.erl) monad):
 
 ```erlang
 -include_lib("do/include/do.hrl").
@@ -79,7 +82,7 @@ and functions. The macro takes a start value (a monad), and a list of functions.
 The functions must each take either 0 or 1 argument(s) and must return a monad.
 On execution, the start value is passed to the first function, and is then
 piped through consecutive functions using `bind` or `then`. For example (with
-[`maybe`](./src/do_maybe.erl) monad):
+[`maybe`](./src/instances/do_maybe.erl) monad):
 
 ```erlang
 -include_lib("do/include/do.hrl").
