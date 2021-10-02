@@ -96,7 +96,8 @@ mod(Type) when ?isF1(Type)   -> do_fn;
 mod({error, _})              -> do_either;
 mod({ok, _})                 -> do_either;
 mod(nothing)                 -> do_maybe;
-mod({just, _})               -> do_maybe.
+mod({just, _})               -> do_maybe;
+mod({writer, _, _})          -> do_writer.
 
 %%%_* Tests ===================================================================
 -ifdef(TEST).

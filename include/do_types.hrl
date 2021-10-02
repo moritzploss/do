@@ -7,11 +7,14 @@
 
 -type maybe(A)       :: {just, A} | nothing.
 
+-type writer(A, B)   :: {writer, A, B}.
+
 %%%_* type classes ------------------------------------------------------------
 -type applicative(A) :: [A]
                         | fn(_, A)
                         | either(_, A)
-                        | maybe(A).
+                        | maybe(A)
+                        | writer(_, A).
 
 -type foldable(A)    :: [A]
                         | maybe(A)
@@ -21,11 +24,13 @@
                         | map(A)
                         | fn(_, A)
                         | either(_, A)
-                        | maybe(A).
+                        | maybe(A)
+                        | writer(_, A).
 
 -type monad(A)       :: [A]
                         | either(_, A)
-                        | maybe(A).
+                        | maybe(A)
+                        | writer(_, A).
 
 -type monoid()       :: [monoid()]
                         | maybe(monoid())

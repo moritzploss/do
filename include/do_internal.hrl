@@ -12,6 +12,8 @@
 -define(Mod(A),     (do:mod(A))).
 
 -ifdef(TEST).
+    -include_lib("eunit/include/eunit.hrl").
+
     -define(equals(A, B), begin
         ?assertEqual(A, B),
         ?assertEqual(A, do:B)

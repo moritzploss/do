@@ -34,7 +34,8 @@ functors(A) ->
   , {ok, A}
   , {error, reason}
   , {just, A}
-  , nothing].
+  , nothing
+  , {writer, [], A}].
   
 preserve_identity_morphism_test() ->
   Id       = fun(Term) -> Term end,
