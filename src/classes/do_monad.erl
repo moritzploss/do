@@ -20,7 +20,7 @@
 -callback do(monad(_), list(fn(_, monad(_)))) -> monad(_).
 -callback then(monad(_), fn(monad(A))) -> monad(A).
 -callback lift(fn(A, B)) -> fn(monad(A), monad(B)).
--callback liftm(fun(), [monad(A)] | [fn(monad(A))]) -> monad(_).
+-callback liftm(fun(), [monad(_)] | [fn(monad(_))]) -> monad(_).
 
 %%%_* Code ====================================================================
 %%%_* API ---------------------------------------------------------------------
