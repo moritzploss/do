@@ -1,6 +1,6 @@
 {application, do,
  [{description, "Monads, Functors and Do-Notation for Erlang"},
-  {vsn, "1.10.2"},
+  {vsn, "1.10.3"},
   {registered, []},
   {applications,
    [kernel,
