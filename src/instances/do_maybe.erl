@@ -43,7 +43,7 @@
                is_nothing/1,
                list_to_maybe/1,
                map_maybes/2,
-               maybe/3,
+               'maybe'/3,
                maybe_to_list/1]).
 
 -export(?API).
@@ -56,91 +56,91 @@
 
 %%%_* Code ====================================================================
 %%%_* semigroup ---------------------------------------------------------------
--spec append(maybe(A), maybe(A)) -> maybe(A).
+-spec append('maybe'(A), 'maybe'(A)) -> 'maybe'(A).
 append({just, A1}, {just, A2}) -> {just, do_semigroup:append(A1, A2)};
 append(nothing, {just, A})     -> {just, A};
 append({just, A}, nothing)     -> {just, A};
 append(nothing, nothing)       -> nothing.
 
 %%%_* monoid ------------------------------------------------------------------
--spec mempty() -> maybe(_).
+-spec mempty() -> 'maybe'(_).
 mempty() -> nothing.
 
 %%%_* foldable ----------------------------------------------------------------
--spec foldr(fn(A, B, B), B, maybe(A)) -> B.
+-spec foldr(fn(A, B, B), B, 'maybe'(A)) -> B.
 foldr(_, Acc, nothing)   -> Acc;
 foldr(F, Acc, {just, A}) -> F(A, Acc).
 
 %%%_* functor -----------------------------------------------------------------
--spec fmap(fn(A, B), Maybe :: maybe(A)) -> maybe(B).
+-spec fmap(fn(A, B), Maybe :: 'maybe'(A)) -> 'maybe'(B).
 fmap(F, {just, A}) when ?isF1(F) -> {just, F(A)};
 fmap(F, nothing)   when ?isF1(F) -> nothing.
 
 %%%_* applicative -------------------------------------------------------------
--spec liftA2(Maybe :: maybe(fn(A, B)), Maybe :: maybe(A)) -> maybe(B).
+-spec liftA2(Maybe :: 'maybe'(fn(A, B)), Maybe :: 'maybe'(A)) -> 'maybe'(B).
 liftA2({just, F}, Maybe) when ?isF1(F) -> fmap(F, Maybe);
 liftA2(nothing, _)                     -> nothing.
 
--spec pure(A) -> maybe(A).
+-spec pure(A) -> 'maybe'(A).
 pure(A) -> {just, A}.
 
 %%%_* traversable -------------------------------------------------------------
--spec sequence(maybe(applicative(A))) -> applicative(maybe(A)).
+-spec sequence('maybe'(applicative(A))) -> applicative('maybe'(A)).
 sequence({just, A} = Maybe) -> do_traversable:sequence(Maybe, ?MODULE, ?Mod(A));
 sequence(nothing)           -> nothing.
 
--spec traverse(fn(A, applicative(B)), maybe(A)) -> applicative(maybe(B)).
+-spec traverse(fn(A, applicative(B)), 'maybe'(A)) -> applicative('maybe'(B)).
 traverse(F, Maybe) when ?isF1(F) -> fmap(F, Maybe).
 
 %%%_* monad -------------------------------------------------------------------
--spec bind(maybe(A), fn(A, maybe(B))) -> maybe(B).
+-spec bind('maybe'(A), fn(A, 'maybe'(B))) -> 'maybe'(B).
 bind(Maybe, F) when ?isF1(F) -> flat(fmap(F, Maybe)).
 
--spec do(maybe(A), [fn(A, maybe(B)) | fn(maybe(B))]) -> maybe(B).
+-spec do('maybe'(A), [fn(A, 'maybe'(B)) | fn('maybe'(B))]) -> 'maybe'(B).
 do(Maybe, Fs) -> do_monad:do(Maybe, Fs).
 
 -spec lift(fn(A, B)) -> fn(monad(A), monad(B)).
 lift(F) -> do_monad:lift(F, ?MODULE).
 
--spec liftm(fun(), [maybe(A)]) -> maybe(A).
+-spec liftm(fun(), ['maybe'(A)]) -> 'maybe'(A).
 liftm(F, Maybes) -> do_monad:liftm(F, Maybes).
 
--spec then(maybe(_), fn(maybe(A))) -> maybe(A).
+-spec then('maybe'(_), fn('maybe'(A))) -> 'maybe'(A).
 then(Maybe, F) -> do_monad:then(Maybe, F).
 
 %%%_* maybe -------------------------------------------------------------------
--spec maybe(B, fn(A, B), Maybe :: maybe(A)) -> B.
-maybe(B, F, nothing)   when ?isF1(F) -> B;
-maybe(_, F, {just, A}) when ?isF1(F) -> F(A).
+-spec 'maybe'(B, fn(A, B), Maybe :: 'maybe'(A)) -> B.
+'maybe'(B, F, nothing)   when ?isF1(F) -> B;
+'maybe'(_, F, {just, A}) when ?isF1(F) -> F(A).
 
--spec is_just(Maybe :: maybe(_)) -> boolean().
+-spec is_just(Maybe :: 'maybe'(_)) -> boolean().
 is_just({just, _}) -> true;
 is_just(nothing)   -> false.
 
--spec is_nothing(maybe(_)) -> boolean().
+-spec is_nothing('maybe'(_)) -> boolean().
 is_nothing(A) -> not is_just(A).
 
--spec from_just(Maybe :: maybe(A)) -> A.
+-spec from_just(Maybe :: 'maybe'(A)) -> A.
 from_just({just, A}) -> A.
 
--spec from_maybe(A, Maybe :: maybe(A)) -> A.
+-spec from_maybe(A, Maybe :: 'maybe'(A)) -> A.
 from_maybe(A, nothing)   -> A;
 from_maybe(_, {just, V}) -> V.
 
--spec list_to_maybe([A]) -> maybe(A).
+-spec list_to_maybe([A]) -> 'maybe'(A).
 list_to_maybe([A | _]) -> pure(A);
 list_to_maybe([])      -> nothing.
 
--spec maybe_to_list(Maybe :: maybe(A)) -> [A].
+-spec maybe_to_list(Maybe :: 'maybe'(A)) -> [A].
 maybe_to_list({just, A}) -> [A];
 maybe_to_list(nothing)   -> [].
 
--spec cat_maybes([maybe(A)]) -> [A].
+-spec cat_maybes(['maybe'(A)]) -> [A].
 cat_maybes(Maybes) when is_list(Maybes) ->
   lists:flatmap(fun({just, A}) -> [A];
                    (nothing)   -> [] end, Maybes).
 
--spec map_maybes(fn(A, maybe(B)), [A]) -> [B].
+-spec map_maybes(fn(A, 'maybe'(B)), [A]) -> [B].
 map_maybes(F, List) when ?isF1(F), is_list(List) ->
   cat_maybes(do_list:fmap(F, List)).
 
@@ -215,8 +215,8 @@ do_test() ->
 
 maybe_test() ->
   F = fun(A) -> A + 1 end,
-  ?assertEqual(1, maybe(1, F, nothing)),
-  ?assertEqual(2, maybe(1, F, {just, 1})).
+  ?assertEqual(1, 'maybe'(1, F, nothing)),
+  ?assertEqual(2, 'maybe'(1, F, {just, 1})).
 
 is_just_test() ->
   ?assertEqual(false, is_just(nothing)),

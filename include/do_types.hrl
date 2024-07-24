@@ -5,40 +5,40 @@
 
 -type map(A)         :: #{_ := A}.
 
--type maybe(A)       :: {just, A} | nothing.
+-type 'maybe'(A)       :: {just, A} | nothing.
 
 %%%_* type classes ------------------------------------------------------------
 -type applicative(A) :: [A]
                         | fn(_, A)
                         | either(_, A)
-                        | maybe(A).
+                        | 'maybe'(A).
 
 -type foldable(A)    :: [A]
-                        | maybe(A)
+                        | 'maybe'(A)
                         | either(_, A).
 
 -type functor(A)     :: [A]
                         | map(A)
                         | fn(_, A)
                         | either(_, A)
-                        | maybe(A).
+                        | 'maybe'(A).
 
 -type monad(A)       :: [A]
                         | either(_, A)
-                        | maybe(A).
+                        | 'maybe'(A).
 
 -type monoid()       :: [monoid()]
-                        | maybe(monoid())
+                        | 'maybe'(monoid())
                         | either(_, monoid()).
 
 -type semigroup(A)   :: [A]
                         | map(A)
                         | either(_, A)
-                        | maybe(A).
+                        | 'maybe'(A).
 
 -type traversable(A) :: [A]
                         | either(_, A)
-                        | maybe(A).
+                        | 'maybe'(A).
 
 %%%_* other -------------------------------------------------------------------
 -type fn(A)          :: fun(() -> A).
