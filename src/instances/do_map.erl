@@ -71,7 +71,7 @@ fmap_test() ->
 sequence_test() ->
   ?equals(#{},                     sequence(#{})),
   ?equals({ok, #{a => 1, b => 2}}, sequence(#{a => {ok, 1}, b => {ok, 2}})),
-  ?equals(nothing,                 sequence(#{a => nothing, b => {ok, 2}})),
+  ?equals(nothing,                 sequence(#{a => nothing, b => {just, 2}})),
   ?equals([#{a => 1, b => 2}],     sequence(#{a => [1], b => [2]})).
 
 -endif.
